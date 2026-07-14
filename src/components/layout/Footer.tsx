@@ -10,7 +10,7 @@ export default function Footer() {
           <Link href="/" className="flex items-center gap-2">
             <div className="relative h-8 w-8 overflow-hidden">
               <Image
-                src="/tent/bcl-icon.svg"
+                src="/bcl-icon.svg"
                 alt="BCL Camp Logo"
                 fill
                 className="object-contain brightness-0 invert"

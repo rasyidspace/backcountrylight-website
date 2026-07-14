@@ -29,7 +29,7 @@ export default function Navbar() {
         <Link href="/" className="flex items-center gap-2 group">
           <div className="relative h-8 w-8 overflow-hidden">
             <Image
-              src="/tent/bcl-icon.svg"
+              src="/bcl-icon.svg"
               alt="BCL Camp Logo"
               fill
               className="object-contain"
