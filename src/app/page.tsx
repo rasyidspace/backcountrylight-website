@@ -9,7 +9,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* 1. Hero */}
-      <section className="relative h-[85vh] w-full bg-muted flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[90svh] w-full bg-muted flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-black/30 z-10"></div>
         <Image
           src="/tent/tc-hero-lifestyle.webp"
@@ -23,10 +23,10 @@ export default function Home() {
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading font-medium tracking-tight text-white balance-text drop-shadow-md">
             Lightweight gear for heavier adventures.
           </h1>
-          <p className="mt-6 text-lg md:text-xl text-white/90 max-w-2xl balance-text drop-shadow">
+          <p className="mt-8 md:mt-6 text-lg md:text-xl text-white/90 max-w-2xl balance-text drop-shadow">
             Premium outdoor retail and rental equipment specializing in ultralight backpacking, hiking, and camping.
           </p>
-          <div className="mt-10 flex flex-col sm:flex-row gap-4 items-center justify-center">
+          <div className="mt-12 md:mt-10 flex flex-col sm:flex-row gap-6 md:gap-4 items-center justify-center">
             <Button size="lg" className="rounded-none px-8 font-medium bg-white text-black hover:bg-white/90" render={<Link href="/shop" />}>
               Shop Gear
             </Button>
@@ -34,11 +34,11 @@ export default function Home() {
               Rent Gear
             </Button>
           </div>
-          <div className="mt-16 flex items-center justify-center gap-8 text-sm font-medium text-white/80 uppercase tracking-widest drop-shadow-sm">
+          <div className="mt-20 md:mt-16 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 md:gap-8 text-xs md:text-sm font-medium text-white/80 uppercase tracking-widest drop-shadow-sm">
             <span>Premium Quality</span>
-            <span>•</span>
+            <span className="hidden md:inline">•</span>
             <span>Expert Curated</span>
-            <span>•</span>
+            <span className="hidden md:inline">•</span>
             <span>Ultralight</span>
           </div>
         </div>
@@ -76,7 +76,7 @@ export default function Home() {
               View All Products
             </Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8 md:gap-x-6 md:gap-y-12">
             {PRODUCTS.slice(0, 4).map((product) => (
               <ProductCard 
                 key={product.id}

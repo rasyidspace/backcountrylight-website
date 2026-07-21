@@ -37,7 +37,7 @@ export default function ShopPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12">
+          <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-x-4 gap-y-8 md:gap-x-6 md:gap-y-12">
             {shopProducts.map((product) => (
               <ProductCard key={product.id} {...product} href={`/shop/${product.slug}`} />
             ))}

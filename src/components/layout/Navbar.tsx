@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { User, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SearchDialog } from "@/components/layout/SearchDialog";
@@ -11,8 +12,11 @@ export default function Navbar() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
-            <Link href="/" className="text-xl font-heading font-semibold tracking-tight">
-              BACKCOUNTRY LIGHT
+            <Link href="/" className="flex items-center gap-2">
+              <Image src="/bcl-icon.svg" alt="Backcountry Light" width={32} height={32} className="md:hidden" />
+              <span className="hidden md:block text-xl font-heading font-semibold tracking-tight">
+                BACKCOUNTRY LIGHT
+              </span>
             </Link>
           </div>
           
