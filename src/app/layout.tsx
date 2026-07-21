@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Inter, Instrument_Serif } from "next/font/google";
+import { Inter } from "next/font/google";
+import { GeistSans } from 'geist/font/sans';
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -10,16 +11,9 @@ const inter = Inter({
   display: "swap",
 });
 
-const instrumentSerif = Instrument_Serif({
-  weight: "400",
-  subsets: ["latin"],
-  variable: "--font-instrument-serif",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
-  title: "BCL Camp | Premium Outdoor Equipment Rental",
-  description: "Premium camping gear rental platform under the Backcountry Light ecosystem.",
+  title: "Backcountry Light | Premium Outdoor Gear & Rental",
+  description: "Premium outdoor retail and rental company specializing in ultralight backpacking, hiking, and camping equipment.",
 };
 
 export default function RootLayout({
@@ -28,8 +22,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${instrumentSerif.variable}`}>
-      <body className="font-sans text-text antialiased selection:bg-primary selection:text-white flex min-h-screen flex-col">
+    <html lang="en" className={`${inter.variable} ${GeistSans.variable}`}>
+      <body className="font-sans antialiased flex min-h-screen flex-col bg-background text-foreground">
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />
