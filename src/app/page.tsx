@@ -27,11 +27,11 @@ export default function Home() {
             Premium outdoor retail and rental equipment specializing in ultralight backpacking, hiking, and camping.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row gap-4 items-center justify-center">
-            <Button size="lg" asChild className="rounded-none px-8 font-medium bg-white text-black hover:bg-white/90">
-              <Link href="/shop">Shop Gear</Link>
+            <Button size="lg" className="rounded-none px-8 font-medium bg-white text-black hover:bg-white/90" render={<Link href="/shop" />}>
+              Shop Gear
             </Button>
-            <Button size="lg" variant="outline" asChild className="rounded-none px-8 font-medium text-white border-white hover:bg-white hover:text-black bg-black/20 backdrop-blur-sm">
-              <Link href="/rental">Rent Gear</Link>
+            <Button size="lg" variant="outline" className="rounded-none px-8 font-medium text-white border-white hover:bg-white hover:text-black bg-black/20 backdrop-blur-sm" render={<Link href="/rental" />}>
+              Rent Gear
             </Button>
           </div>
           <div className="mt-16 flex items-center justify-center gap-8 text-sm font-medium text-white/80 uppercase tracking-widest drop-shadow-sm">
@@ -92,8 +92,8 @@ export default function Home() {
             ))}
           </div>
           <div className="mt-12 text-center sm:hidden">
-            <Button variant="outline" asChild className="rounded-none w-full">
-              <Link href="/shop">View All Products</Link>
+            <Button variant="outline" className="rounded-none w-full" render={<Link href="/shop" />}>
+              View All Products
             </Button>
           </div>
         </div>
@@ -123,8 +123,8 @@ export default function Home() {
                 <p className="text-sm text-muted-foreground">Fill in the gaps in your own kit with individual rentals.</p>
               </div>
             </div>
-            <Button size="lg" asChild className="rounded-none">
-              <Link href="/rental">Explore Rental</Link>
+            <Button size="lg" className="rounded-none" render={<Link href="/rental" />}>
+              Explore Rental
             </Button>
           </div>
         </div>

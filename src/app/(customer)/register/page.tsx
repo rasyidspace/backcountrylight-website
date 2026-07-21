@@ -43,8 +43,8 @@ export default function RegisterPage() {
             </div>
           </div>
           
-          <Button size="lg" className="w-full rounded-none" asChild>
-            <Link href="/">Create Account</Link>
+          <Button size="lg" className="w-full rounded-none" render={<Link href="/login" />}>
+            Create Account
           </Button>
           
           <p className="text-xs text-center text-muted-foreground">

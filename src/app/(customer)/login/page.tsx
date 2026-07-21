@@ -36,8 +36,8 @@ export default function LoginPage() {
             </div>
           </div>
           
-          <Button size="lg" className="w-full rounded-none" asChild>
-            <Link href="/">Sign In</Link>
+          <Button size="lg" className="w-full rounded-none" render={<Link href="/" />}>
+            Sign In
           </Button>
         </div>
         
