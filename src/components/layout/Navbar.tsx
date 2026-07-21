@@ -4,6 +4,7 @@ import { User, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SearchDialog } from "@/components/layout/SearchDialog";
 import { CartSidebar } from "@/components/layout/CartSidebar";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 // HMR trigger
 
 export default function Navbar() {
@@ -36,9 +37,37 @@ export default function Navbar() {
               </Button>
             </Link>
             <CartSidebar />
-            <Button variant="ghost" size="icon" className="md:hidden" aria-label="Menu">
-              <Menu className="h-5 w-5" />
-            </Button>
+            <Sheet>
+              <SheetTrigger render={
+                <Button variant="ghost" size="icon" className="md:hidden" aria-label="Menu" />
+              }>
+                <Menu className="h-5 w-5" />
+              </SheetTrigger>
+              <SheetContent side="left" className="w-full max-w-[300px]">
+                <SheetHeader className="text-left px-0 border-b pb-4 mb-4">
+                  <SheetTitle className="font-heading font-black tracking-tight text-xl">
+                    BACKCOUNTRY LIGHT
+                  </SheetTitle>
+                </SheetHeader>
+                <nav className="flex flex-col gap-6 text-lg font-medium">
+                  <SheetClose render={<Link href="/shop" className="transition-colors hover:text-foreground/80 text-left" />}>
+                    Shop
+                  </SheetClose>
+                  <SheetClose render={<Link href="/rental" className="transition-colors hover:text-foreground/80 text-left" />}>
+                    Rental
+                  </SheetClose>
+                  <SheetClose render={<Link href="/brands" className="transition-colors hover:text-foreground/80 text-left" />}>
+                    Brands
+                  </SheetClose>
+                  <SheetClose render={<Link href="/journal" className="transition-colors hover:text-foreground/80 text-left" />}>
+                    Journal
+                  </SheetClose>
+                  <SheetClose render={<Link href="/about" className="transition-colors hover:text-foreground/80 text-left" />}>
+                    About
+                  </SheetClose>
+                </nav>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>
