@@ -29,27 +29,27 @@ export default function Navbar() {
             <Link href="/about" className="transition-colors hover:text-foreground/80">About</Link>
           </nav>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-0 md:gap-2">
             <SearchDialog />
+            <CartSidebar />
             <Link href="/login">
               <Button variant="ghost" size="icon" aria-label="Login">
                 <User className="h-5 w-5" />
               </Button>
             </Link>
-            <CartSidebar />
             <Sheet>
               <SheetTrigger render={
                 <Button variant="ghost" size="icon" className="md:hidden" aria-label="Menu" />
               }>
                 <Menu className="h-5 w-5" />
               </SheetTrigger>
-              <SheetContent side="left" className="w-full max-w-[300px]">
-                <SheetHeader className="text-left px-0 border-b pb-4 mb-4">
+              <SheetContent side="left" className="w-full max-w-[300px] p-6">
+                <SheetHeader className="text-left border-b pb-4 mb-4">
                   <SheetTitle className="font-heading font-black tracking-tight text-xl">
                     BACKCOUNTRY LIGHT
                   </SheetTitle>
                 </SheetHeader>
-                <nav className="flex flex-col gap-6 text-lg font-medium">
+                <nav className="flex flex-col gap-6 text-lg font-medium mt-4">
                   <SheetClose render={<Link href="/shop" className="transition-colors hover:text-foreground/80 text-left" />}>
                     Shop
                   </SheetClose>
