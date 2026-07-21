@@ -5,7 +5,7 @@ import { Search } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { PRODUCTS, BRANDS } from "@/lib/mockData";
-import { Button } from "@/components/ui/button";
+
 import { useRouter } from "next/navigation";
 
 export function SearchDialog() {

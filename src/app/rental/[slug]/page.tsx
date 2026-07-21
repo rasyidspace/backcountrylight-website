@@ -93,7 +93,7 @@ export default async function RentalProductPage({ params }: { params: Promise<{ 
             )}
           </div>
 
-          <Accordion type="single" className="w-full" defaultValue="specifications">
+          <Accordion className="w-full" defaultValue={["specifications"]}>
             <AccordionItem value="specifications">
               <AccordionTrigger className="font-heading text-lg">Specifications</AccordionTrigger>
               <AccordionContent>

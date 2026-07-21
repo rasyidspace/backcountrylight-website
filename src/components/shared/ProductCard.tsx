@@ -16,7 +16,7 @@ interface ProductCardProps {
   href: string;
 }
 
-export function ProductCard({ id, name, brand, price, rentalPrice, image, type, href }: ProductCardProps) {
+export function ProductCard({ name, brand, price, rentalPrice, image, type, href }: ProductCardProps) {
   return (
     <Link href={href} className="group flex flex-col gap-3">
       <div className="relative aspect-[4/5] overflow-hidden bg-muted">

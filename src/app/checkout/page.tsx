@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { PRODUCTS } from "@/lib/mockData";
 import { formatRupiah } from "@/lib/utils";
 import Image from "next/image";
-import Link from "next/link";
+
 
 export default function CheckoutPage() {
   const cartItems = [PRODUCTS[0], PRODUCTS[1]];

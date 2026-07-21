@@ -48,18 +48,21 @@ export default async function JournalArticlePage({ params }: { params: Promise<{
         <p className="lead text-xl text-muted-foreground mb-8">
           The following is placeholder text designed to demonstrate the editorial layout of a standard backcountry journal article. It aims to capture the spirit of ultralight adventure.
         </p>
-        <p>
-          It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English.
-        </p>
+          <p>
+            Enter the ultralight movement. Pioneered by thru-hikers who were spending months on the trail, the ultralight philosophy flips the traditional approach on its head. Instead of asking &quot;what might I need?&quot;, ultralight backpackers ask &quot;what can I safely do without?&quot;
+          </p>
+          <p>
+            For years, the standard advice for backpackers was to pack heavy, durable gear that could withstand anything nature threw at you. The logic was sound—if you&apos;re heading into the wilderness, you need equipment that won&apos;t fail. However, this philosophy led to packs weighing 50 pounds or more, turning a weekend hike into a grueling test of endurance rather than an enjoyable escape.
+          </p>
         <h2 className="text-2xl font-heading font-medium mt-12 mb-6">The Journey Begins</h2>
-        <p>
-          Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
-        </p>
+          <p>
+            Today, thanks to advancements in materials science—most notably Dyneema Composite Fabrics (DCF) and high-fill-power down—it&apos;s entirely possible to have a base weight (the weight of your pack excluding food, water, and fuel) under 10 pounds without sacrificing safety or reasonable comfort. This shift hasn&apos;t just changed what we carry; it has changed how we experience the backcountry.
+          </p>
         <blockquote className="border-l-2 border-foreground pl-6 my-8 italic text-xl">
-          "The mountains are calling and I must go. Not to conquer them, but to surrender to them."
+          &quot;The mountains are calling and I must go. Not to conquer them, but to surrender to them.&quot;
         </blockquote>
         <p>
-          There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text.
+          There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don&apos;t look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn&apos;t anything embarrassing hidden in the middle of text.
         </p>
         
         <div className="mt-16 pt-8 border-t border-border flex items-center justify-between">

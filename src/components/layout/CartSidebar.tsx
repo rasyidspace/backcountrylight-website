@@ -21,7 +21,7 @@ export function CartSidebar() {
           <ShoppingCart className="h-12 w-12 text-muted-foreground/20 mb-2" strokeWidth={1} />
           <h3 className="text-xl font-heading font-medium">Your cart is empty</h3>
           <p className="text-muted-foreground text-sm max-w-[250px]">
-            Looks like you haven't added any ultralight gear to your cart yet.
+            Looks like you haven&apos;t added any ultralight gear to your cart yet.
           </p>
           <Button variant="outline" className="mt-4 rounded-none" render={<Link href="/shop" />}>
             Start Shopping

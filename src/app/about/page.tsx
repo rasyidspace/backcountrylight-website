@@ -30,9 +30,9 @@ export default function AboutPage() {
 
       {/* Mission Section */}
       <section className="py-24 container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl text-center">
-        <h2 className="text-2xl md:text-3xl font-heading font-medium leading-relaxed text-foreground">
-          "We founded Backcountry Light with a simple belief: the less you carry, the more you experience. A lighter pack doesn't just save your knees—it frees your mind to actually enjoy the environment you worked so hard to reach."
-        </h2>
+        <p className="text-xl md:text-2xl font-heading font-medium leading-relaxed max-w-4xl mx-auto balance-text">
+          &quot;We believe that the less you carry, the more you connect with your surroundings. Backcountry Light was founded on the simple idea that premium, ultralight gear shouldn&apos;t be a luxury reserved only for the elite few—it should be accessible to anyone seeking to move fast and light.&quot;
+        </p>
         <div className="mt-12 w-16 h-[1px] bg-foreground mx-auto"></div>
       </section>
 
@@ -49,7 +49,7 @@ export default function AboutPage() {
                 The outdoor industry is saturated with heavy, over-engineered gear designed for the mass market. We take a different approach. We obsessively test and curate equipment that prioritizes weight-to-performance ratios above all else.
               </p>
               <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-                Whether you're attempting a thru-hike of the PCT or a fast-and-light weekend mission in the local range, our retail and rental fleets exist to eliminate the barrier of heavy equipment.
+                Whether you&apos;re attempting a thru-hike of the PCT or a fast-and-light weekend mission in the local range, our retail and rental fleets exist to eliminate the barrier of heavy equipment.
               </p>
               <Button size="lg" className="rounded-none" render={<Link href="/shop" />}>
                 Explore the Collection
@@ -74,8 +74,8 @@ export default function AboutPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-left border-t border-b border-border/50 py-16">
           <div>
-            <h3 className="text-xl font-heading font-medium mb-4">Uncompromising Quality</h3>
-            <p className="text-muted-foreground leading-relaxed">We only stock brands and products that we personally trust when we're 30 miles from the nearest trailhead. No gimmicks, just gear that works.</p>
+            <h3 className="font-heading font-medium text-xl mb-3">Leave No Trace</h3>
+            <p className="text-muted-foreground">We advocate for minimal impact practices. Traveling light isn&apos;t just about comfort, it&apos;s about treading lightly on the earth.</p>
           </div>
           <div>
             <h3 className="text-xl font-heading font-medium mb-4">Accessibility through Rental</h3>

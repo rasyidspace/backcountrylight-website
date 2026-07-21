@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { PRODUCTS } from "@/lib/mockData";
+import { PRODUCTS, type Product } from "@/lib/mockData";
 import { formatRupiah } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Trash2, Plus, Minus, Info } from "lucide-react";
@@ -10,16 +10,33 @@ export const metadata = {
   description: "Review your ultralight gear before checkout.",
 };
 
+type BaseCartItem = Product & {
+  quantity: number;
+};
+
+type RetailCartItem = BaseCartItem & {
+  cartType: "buy";
+};
+
+type RentalCartItem = BaseCartItem & {
+  cartType: "rent";
+  rentalDays: number;
+};
+
+type CartItem = RetailCartItem | RentalCartItem;
+
 export default function CartPage() {
   // Use mock products for cart demonstration
-  const cartItems = [
-    { ...PRODUCTS[0], quantity: 1, cartType: "buy" },
-    { ...PRODUCTS[2], quantity: 1, cartType: "rent", rentalDays: 3 },
+  const cartItems: CartItem[] = [
+    { ...PRODUCTS[0], quantity: 1, cartType: "buy" } as RetailCartItem,
+    { ...PRODUCTS[2], quantity: 1, cartType: "rent", rentalDays: 3 } as RentalCartItem,
   ];
 
   const subtotal = cartItems.reduce((acc, item) => {
-    const itemPrice = item.cartType === "rent" ? (item.rentalPrice || 0) * (item.rentalDays || 1) : item.price;
-    return acc + itemPrice * item.quantity;
+    if (item.cartType === "rent") {
+      return acc + (item.rentalPrice || 0) * item.rentalDays * item.quantity;
+    }
+    return acc + item.price * item.quantity;
   }, 0);
 
   const shipping = 50000; // Flat rate shipping for example
@@ -81,7 +98,7 @@ export default function CartPage() {
                     {/* Price & Remove */}
                     <div className="col-span-1 md:col-span-3 flex items-center justify-between md:flex-col md:items-end md:justify-center gap-4">
                       <span className="font-medium text-lg">
-                        {formatRupiah(item.cartType === "rent" ? (item.rentalPrice || 0) * (item.rentalDays || 1) * item.quantity : item.price * item.quantity)}
+                        {formatRupiah(item.cartType === "rent" ? (item.rentalPrice || 0) * item.rentalDays * item.quantity : item.price * item.quantity)}
                       </span>
                       <button className="text-sm text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1">
                         <Trash2 className="h-4 w-4" />

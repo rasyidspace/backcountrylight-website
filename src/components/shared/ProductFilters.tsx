@@ -1,7 +1,7 @@
 "use client";
 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
+
 import { SlidersHorizontal } from "lucide-react";
 import { CATEGORIES, BRANDS } from "@/lib/mockData";
 import { Label } from "@/components/ui/label";

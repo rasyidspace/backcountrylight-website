@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { PRODUCTS } from "@/lib/mockData";
 import { ProductGallery } from "@/components/shared/ProductGallery";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+
 import Link from "next/link";
 import { formatRupiah } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -67,7 +67,7 @@ export default async function ShopProductPage({ params }: { params: Promise<{ sl
             )}
           </div>
 
-          <Accordion type="single" className="w-full" defaultValue="specifications">
+          <Accordion className="w-full" defaultValue={["specifications"]}>
             <AccordionItem value="specifications">
               <AccordionTrigger className="font-heading text-lg">Specifications</AccordionTrigger>
               <AccordionContent>
