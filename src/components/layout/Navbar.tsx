@@ -7,7 +7,13 @@ import { CartSidebar } from "@/components/layout/CartSidebar";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 // HMR trigger
 
-export default function Navbar() {
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+import { ProfileDropdown } from "@/components/layout/ProfileDropdown";
+
+export default async function Navbar() {
+  const session = await getServerSession(authOptions);
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
@@ -23,7 +29,6 @@ export default function Navbar() {
           
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
             <Link href="/shop" className="transition-colors hover:text-foreground/80">Shop</Link>
-            <Link href="/rental" className="transition-colors hover:text-foreground/80">Rental</Link>
             <Link href="/brands" className="transition-colors hover:text-foreground/80">Brands</Link>
             <Link href="/journal" className="transition-colors hover:text-foreground/80">Journal</Link>
             <Link href="/about" className="transition-colors hover:text-foreground/80">About</Link>
@@ -32,11 +37,7 @@ export default function Navbar() {
           <div className="flex items-center gap-0 md:gap-2">
             <SearchDialog />
             <CartSidebar />
-            <Link href="/login">
-              <Button variant="ghost" size="icon" aria-label="Login">
-                <User className="h-5 w-5" />
-              </Button>
-            </Link>
+            <ProfileDropdown session={session} />
             <Sheet>
               <SheetTrigger render={
                 <Button variant="ghost" size="icon" className="md:hidden" aria-label="Menu" />
@@ -50,19 +51,16 @@ export default function Navbar() {
                   </SheetTitle>
                 </SheetHeader>
                 <nav className="flex flex-col gap-6 text-lg font-medium mt-4">
-                  <SheetClose render={<Link href="/shop" className="transition-colors hover:text-foreground/80 text-left" />}>
+                  <SheetClose nativeButton={false} render={<Link href="/shop" className="transition-colors hover:text-foreground/80 text-left" />}>
                     Shop
                   </SheetClose>
-                  <SheetClose render={<Link href="/rental" className="transition-colors hover:text-foreground/80 text-left" />}>
-                    Rental
-                  </SheetClose>
-                  <SheetClose render={<Link href="/brands" className="transition-colors hover:text-foreground/80 text-left" />}>
+                  <SheetClose nativeButton={false} render={<Link href="/brands" className="transition-colors hover:text-foreground/80 text-left" />}>
                     Brands
                   </SheetClose>
-                  <SheetClose render={<Link href="/journal" className="transition-colors hover:text-foreground/80 text-left" />}>
+                  <SheetClose nativeButton={false} render={<Link href="/journal" className="transition-colors hover:text-foreground/80 text-left" />}>
                     Journal
                   </SheetClose>
-                  <SheetClose render={<Link href="/about" className="transition-colors hover:text-foreground/80 text-left" />}>
+                  <SheetClose nativeButton={false} render={<Link href="/about" className="transition-colors hover:text-foreground/80 text-left" />}>
                     About
                   </SheetClose>
                 </nav>

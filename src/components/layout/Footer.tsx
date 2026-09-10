@@ -4,13 +4,13 @@ export default function Footer() {
   return (
     <footer className="border-t bg-muted/40">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-1">
             <Link href="/" className="text-lg font-heading font-semibold tracking-tight">
               BACKCOUNTRY LIGHT
             </Link>
             <p className="mt-4 text-sm text-muted-foreground">
-              Premium outdoor retail and rental company specializing in ultralight equipment.
+              Premium outdoor retail company specializing in ultralight equipment.
             </p>
           </div>
           <div>
@@ -23,15 +23,7 @@ export default function Footer() {
               <li><Link href="/shop?category=accessories" className="hover:text-foreground">Accessories</Link></li>
             </ul>
           </div>
-          <div>
-            <h3 className="font-heading font-medium mb-4">Rental</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/rental" className="hover:text-foreground">All Equipment</Link></li>
-              <li><Link href="/rental?packages=true" className="hover:text-foreground">Packages</Link></li>
-              <li><Link href="/rental/guide" className="hover:text-foreground">Rental Guide</Link></li>
-              <li><Link href="/rental/faq" className="hover:text-foreground">FAQ</Link></li>
-            </ul>
-          </div>
+
           <div>
             <h3 className="font-heading font-medium mb-4">Company</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">

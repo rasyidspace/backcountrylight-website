@@ -1,14 +1,15 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-export const metadata = {
-  title: "Register | Backcountry Light",
-  description: "Create your Backcountry Light account.",
-};
+import { useActionState } from "react";
+import { registerUser } from "@/app/actions/auth";
 
 export default function RegisterPage() {
+  const [state, action, isPending] = useActionState(registerUser, null);
+
   return (
     <div className="container mx-auto px-4 flex items-center justify-center min-h-[70vh] py-12">
       <div className="mx-auto w-full max-w-[450px] space-y-8">
@@ -19,32 +20,38 @@ export default function RegisterPage() {
           </p>
         </div>
         
-        <div className="space-y-6">
+        <form action={action} className="space-y-6">
+          {state?.error && (
+            <div className="bg-destructive/15 text-destructive p-3 rounded-md text-sm text-center font-medium">
+              {state.error}
+            </div>
+          )}
+
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="first-name">First name</Label>
-                <Input id="first-name" placeholder="John" required className="bg-background" />
+                <Input id="first-name" name="firstName" placeholder="John" required className="bg-background" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="last-name">Last name</Label>
-                <Input id="last-name" placeholder="Doe" required className="bg-background" />
+                <Input id="last-name" name="lastName" placeholder="Doe" required className="bg-background" />
               </div>
             </div>
             
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="hello@example.com" required className="bg-background" />
+              <Input id="email" name="email" type="email" placeholder="hello@example.com" required className="bg-background" />
             </div>
             
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" required className="bg-background" />
+              <Input id="password" name="password" type="password" required className="bg-background" />
             </div>
           </div>
           
-          <Button size="lg" className="w-full rounded-none" render={<Link href="/login" />}>
-            Create Account
+          <Button type="submit" size="lg" className="w-full rounded-none" disabled={isPending}>
+            {isPending ? "Creating Account..." : "Create Account"}
           </Button>
           
           <p className="text-xs text-center text-muted-foreground">
@@ -53,7 +60,7 @@ export default function RegisterPage() {
             and{" "}
             <Link href="#" className="underline hover:text-foreground">Privacy Policy</Link>.
           </p>
-        </div>
+        </form>
         
         <div className="text-center text-sm text-muted-foreground border-t pt-6">
           Already have an account?{" "}

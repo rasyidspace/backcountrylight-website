@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { PRODUCTS, type Product } from "@/lib/mockData";
 import { formatRupiah } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Trash2, Plus, Minus, Info } from "lucide-react";
@@ -10,32 +9,11 @@ export const metadata = {
   description: "Review your ultralight gear before checkout.",
 };
 
-type BaseCartItem = Product & {
-  quantity: number;
-};
-
-type RetailCartItem = BaseCartItem & {
-  cartType: "buy";
-};
-
-type RentalCartItem = BaseCartItem & {
-  cartType: "rent";
-  rentalDays: number;
-};
-
-type CartItem = RetailCartItem | RentalCartItem;
-
 export default function CartPage() {
-  // Use mock products for cart demonstration
-  const cartItems: CartItem[] = [
-    { ...PRODUCTS[0], quantity: 1, cartType: "buy" } as RetailCartItem,
-    { ...PRODUCTS[2], quantity: 1, cartType: "rent", rentalDays: 3 } as RentalCartItem,
-  ];
+  // TODO: Implement actual cart state in Phase 4
+  const cartItems: any[] = [];
 
   const subtotal = cartItems.reduce((acc, item) => {
-    if (item.cartType === "rent") {
-      return acc + (item.rentalPrice || 0) * item.rentalDays * item.quantity;
-    }
     return acc + item.price * item.quantity;
   }, 0);
 
@@ -72,17 +50,10 @@ export default function CartPage() {
                       </div>
                       <div className="flex flex-col justify-center">
                         <span className="text-xs font-bold tracking-widest uppercase text-muted-foreground mb-1">{item.brand}</span>
-                        <Link href={`/${item.cartType === 'rent' ? 'rental' : 'shop'}/${item.slug}`} className="font-heading font-medium text-lg hover:underline underline-offset-4 mb-2">
+                        <Link href={`/shop/${item.slug}`} className="font-heading font-medium text-lg hover:underline underline-offset-4 mb-2">
                           {item.name}
                         </Link>
-                        {item.cartType === "rent" ? (
-                          <div className="text-sm bg-secondary text-secondary-foreground inline-flex items-center px-2 py-1 rounded-sm self-start gap-1">
-                            <Info className="h-3 w-3" />
-                            Rental: {item.rentalDays} Days
-                          </div>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">Retail Purchase</span>
-                        )}
+                        <span className="text-sm text-muted-foreground">Retail Purchase</span>
                       </div>
                     </div>
 
@@ -98,7 +69,7 @@ export default function CartPage() {
                     {/* Price & Remove */}
                     <div className="col-span-1 md:col-span-3 flex items-center justify-between md:flex-col md:items-end md:justify-center gap-4">
                       <span className="font-medium text-lg">
-                        {formatRupiah(item.cartType === "rent" ? (item.rentalPrice || 0) * item.rentalDays * item.quantity : item.price * item.quantity)}
+                        {formatRupiah(item.price * item.quantity)}
                       </span>
                       <button className="text-sm text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1">
                         <Trash2 className="h-4 w-4" />

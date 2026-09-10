@@ -1,15 +1,38 @@
+import prisma from "@/lib/prisma";
+import { Button } from "@/components/ui/button";
 import { ProductFilters } from "@/components/shared/ProductFilters";
 import { ProductCard } from "@/components/shared/ProductCard";
-import { PRODUCTS } from "@/lib/mockData";
-import { Button } from "@/components/ui/button";
 
 export const metadata = {
   title: "Shop Gear | Backcountry Light",
   description: "Shop our premium collection of ultralight outdoor gear.",
 };
 
-export default function ShopPage() {
-  const shopProducts = PRODUCTS.filter(p => p.type === "buy" || p.type === "both");
+export default async function ShopPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
+  const categorySlug = searchParams.category as string;
+  const brandSlug = searchParams.brand as string;
+  
+  const where: any = {};
+  if (categorySlug) {
+    where.category = { slug: categorySlug };
+  }
+  if (brandSlug) {
+    where.brand = { slug: brandSlug };
+  }
+
+  const [shopProducts, categories, brands] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      include: { brand: true, category: true },
+      orderBy: { createdAt: 'desc' }
+    }),
+    prisma.category.findMany({ orderBy: { name: 'asc' } }),
+    prisma.brand.findMany({ orderBy: { name: 'asc' } })
+  ]);
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl py-12 md:py-24">
@@ -21,7 +44,7 @@ export default function ShopPage() {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-        <ProductFilters />
+        <ProductFilters categories={categories} brands={brands} />
         
         <div className="flex-1">
           <div className="hidden lg:flex items-center justify-between mb-8 pb-4 border-b">
@@ -39,7 +62,15 @@ export default function ShopPage() {
 
           <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-x-4 gap-y-8 md:gap-x-6 md:gap-y-12">
             {shopProducts.map((product) => (
-              <ProductCard key={product.id} {...product} href={`/shop/${product.slug}`} />
+              <ProductCard 
+                key={product.id}
+                id={product.id}
+                name={product.name}
+                brand={product.brand.name}
+                price={product.price}
+                image={product.image || "/placeholder.webp"}
+                href={`/shop/${product.slug}`} 
+              />
             ))}
           </div>
           

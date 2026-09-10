@@ -1,21 +1,26 @@
 "use client";
 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-
 import { SlidersHorizontal } from "lucide-react";
-import { CATEGORIES, BRANDS } from "@/lib/mockData";
 import { Label } from "@/components/ui/label";
 
-function FilterContent() {
+type FilterItem = { id: string; name: string; slug: string };
+
+interface ProductFiltersProps {
+  categories: FilterItem[];
+  brands: FilterItem[];
+}
+
+function FilterContent({ categories, brands }: ProductFiltersProps) {
   return (
     <div className="space-y-8">
       <div>
         <h3 className="font-heading font-medium mb-4 text-sm tracking-widest uppercase text-muted-foreground">Category</h3>
         <div className="space-y-3">
-          {CATEGORIES.map((cat) => (
-            <div key={cat} className="flex items-center gap-2">
-              <input type="checkbox" id={`cat-${cat}`} className="rounded border-gray-300 text-foreground focus:ring-foreground accent-foreground" />
-              <Label htmlFor={`cat-${cat}`} className="font-normal text-sm">{cat}</Label>
+          {categories.map((cat) => (
+            <div key={cat.id} className="flex items-center gap-2">
+              <input type="checkbox" id={`cat-${cat.id}`} className="rounded border-gray-300 text-foreground focus:ring-foreground accent-foreground" />
+              <Label htmlFor={`cat-${cat.id}`} className="font-normal text-sm">{cat.name}</Label>
             </div>
           ))}
         </div>
@@ -23,10 +28,10 @@ function FilterContent() {
       <div>
         <h3 className="font-heading font-medium mb-4 text-sm tracking-widest uppercase text-muted-foreground">Brand</h3>
         <div className="space-y-3">
-          {BRANDS.map((brand) => (
-            <div key={brand} className="flex items-center gap-2">
-              <input type="checkbox" id={`brand-${brand}`} className="rounded border-gray-300 text-foreground focus:ring-foreground accent-foreground" />
-              <Label htmlFor={`brand-${brand}`} className="font-normal text-sm">{brand}</Label>
+          {brands.map((brand) => (
+            <div key={brand.id} className="flex items-center gap-2">
+              <input type="checkbox" id={`brand-${brand.id}`} className="rounded border-gray-300 text-foreground focus:ring-foreground accent-foreground" />
+              <Label htmlFor={`brand-${brand.id}`} className="font-normal text-sm">{brand.name}</Label>
             </div>
           ))}
         </div>
@@ -35,12 +40,12 @@ function FilterContent() {
   );
 }
 
-export function ProductFilters() {
+export function ProductFilters({ categories, brands }: ProductFiltersProps) {
   return (
     <>
       <div className="hidden lg:block w-64 flex-shrink-0">
         <div className="sticky top-24">
-          <FilterContent />
+          <FilterContent categories={categories} brands={brands} />
         </div>
       </div>
       
@@ -54,10 +59,10 @@ export function ProductFilters() {
             <SheetHeader className="mb-6 text-left">
               <SheetTitle className="font-heading font-medium">Filters</SheetTitle>
             </SheetHeader>
-            <FilterContent />
+            <FilterContent categories={categories} brands={brands} />
           </SheetContent>
         </Sheet>
-        <span className="text-sm text-muted-foreground">6 Results</span>
+        <span className="text-sm text-muted-foreground">Filter Results</span>
       </div>
     </>
   );
