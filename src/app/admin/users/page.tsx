@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Trash2, Shield, User } from "lucide-react";
-import { deleteUser, toggleUserRole } from "@/app/actions/users";
+import { deleteUser } from "@/app/actions/users";
 
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
