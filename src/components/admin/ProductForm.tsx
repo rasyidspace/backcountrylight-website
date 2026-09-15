@@ -70,7 +70,8 @@ export function ProductForm({ categories, brands, initialData }: ProductFormProp
         });
         
         if (!uploadRes.ok) {
-          throw new Error("Failed to upload image. Make sure Supabase env variables are set.");
+          const errorData = await uploadRes.json().catch(() => ({}));
+          throw new Error(errorData.error || `Failed to upload image (Status: ${uploadRes.status})`);
         }
         
         const { url } = await uploadRes.json();
