@@ -12,6 +12,7 @@ export async function createProduct(formData: FormData) {
   const categoryId = formData.get("categoryId") as string;
   const brandId = formData.get("brandId") as string;
   const image = formData.get("image") as string;
+  const images = formData.getAll("images") as string[];
   const isFeatured = formData.get("isFeatured") === "on";
 
   const slug = name.toLowerCase().replace(/[\s_]+/g, "-").replace(/[^\w-]+/g, "");
@@ -31,6 +32,7 @@ export async function createProduct(formData: FormData) {
         categoryId,
         brandId,
         image,
+        images,
         isFeatured,
       },
     });
@@ -50,6 +52,7 @@ export async function updateProduct(id: string, formData: FormData) {
   const categoryId = formData.get("categoryId") as string;
   const brandId = formData.get("brandId") as string;
   const image = formData.get("image") as string;
+  const images = formData.getAll("images") as string[];
   const isFeatured = formData.get("isFeatured") === "on";
 
   const slug = name.toLowerCase().replace(/[\s_]+/g, "-").replace(/[^\w-]+/g, "");
@@ -69,10 +72,13 @@ export async function updateProduct(id: string, formData: FormData) {
     isFeatured,
   };
 
-  // Only update image if a new one is provided
+  // Only update main image if a new one is provided
   if (image) {
     dataToUpdate.image = image;
   }
+
+  // Always update images array (empty array means they were deleted)
+  dataToUpdate.images = images;
 
   try {
     await prisma.product.update({

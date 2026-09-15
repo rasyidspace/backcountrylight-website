@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { updateProduct, createProduct } from "@/app/actions/products";
 import imageCompression from "browser-image-compression";
+import { X } from "lucide-react";
 
 type Category = { id: string; name: string };
 type Brand = { id: string; name: string };
@@ -19,6 +20,7 @@ type ProductData = {
   categoryId: string;
   brandId: string;
   image: string;
+  images?: string[];
   isFeatured: boolean;
 };
 
@@ -31,6 +33,12 @@ interface ProductFormProps {
 export function ProductForm({ categories, brands, initialData }: ProductFormProps) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(initialData?.image || null);
+  
+  // Detailed Images State
+  const [detailedFiles, setDetailedFiles] = useState<File[]>([]);
+  const [detailedPreviews, setDetailedPreviews] = useState<string[]>([]);
+  const [existingDetailedImages, setExistingDetailedImages] = useState<string[]>(initialData?.images || []);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -42,6 +50,35 @@ export function ProductForm({ categories, brands, initialData }: ProductFormProp
     }
   };
 
+  const handleDetailedFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+    
+    const newFiles = Array.from(e.target.files);
+    const totalImages = existingDetailedImages.length + detailedFiles.length + newFiles.length;
+    
+    if (totalImages > 5) {
+      setError("You can only have up to 5 detailed images in total.");
+      return;
+    }
+    
+    setError("");
+    const previews = newFiles.map(f => URL.createObjectURL(f));
+    setDetailedFiles(prev => [...prev, ...newFiles]);
+    setDetailedPreviews(prev => [...prev, ...previews]);
+  };
+
+  const removeDetailedFile = (index: number) => {
+    setDetailedFiles(prev => prev.filter((_, i) => i !== index));
+    setDetailedPreviews(prev => {
+      URL.revokeObjectURL(prev[index]);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const removeExistingDetailedImage = (index: number) => {
+    setExistingDetailedImages(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -50,24 +87,19 @@ export function ProductForm({ categories, brands, initialData }: ProductFormProp
     try {
       const formData = new FormData(e.currentTarget);
       
-      // 1. If a file is selected, compress and upload it
+      const options = {
+        maxSizeMB: 0.5, // 500KB
+        maxWidthOrHeight: 1200,
+        useWebWorker: true,
+      };
+
+      // 1. Upload main image
       if (file) {
-        // Compress Image
-        const options = {
-          maxSizeMB: 0.5, // 500KB
-          maxWidthOrHeight: 1200,
-          useWebWorker: true,
-        };
         const compressedFile = await imageCompression(file, options);
-        
-        // Upload to our API
         const uploadData = new FormData();
         uploadData.append("file", compressedFile, compressedFile.name);
         
-        const uploadRes = await fetch("/api/upload", {
-          method: "POST",
-          body: uploadData,
-        });
+        const uploadRes = await fetch("/api/upload", { method: "POST", body: uploadData });
         
         if (!uploadRes.ok) {
           const errorData = await uploadRes.json().catch(() => ({}));
@@ -75,14 +107,32 @@ export function ProductForm({ categories, brands, initialData }: ProductFormProp
         }
         
         const { url } = await uploadRes.json();
-        
-        // Append the resulting URL to the form data
         formData.append("image", url);
       } else if (!initialData) {
-        throw new Error("Please select an image to upload.");
+        throw new Error("Please select a main image to upload.");
       }
 
-      // 2. Call Server Action
+      // 2. Upload new detailed images sequentially
+      const newUrls: string[] = [];
+      for (const detailedFile of detailedFiles) {
+        const compressed = await imageCompression(detailedFile, options);
+        const uploadData = new FormData();
+        uploadData.append("file", compressed, compressed.name);
+        
+        const uploadRes = await fetch("/api/upload", { method: "POST", body: uploadData });
+        if (!uploadRes.ok) {
+          throw new Error("Failed to upload one of the detailed images.");
+        }
+        
+        const { url } = await uploadRes.json();
+        newUrls.push(url);
+      }
+
+      // Append all existing and new detailed images to FormData
+      existingDetailedImages.forEach(url => formData.append("images", url));
+      newUrls.forEach(url => formData.append("images", url));
+
+      // 3. Call Server Action
       let result;
       if (initialData) {
         result = await updateProduct(initialData.id, formData);
@@ -158,8 +208,9 @@ export function ProductForm({ categories, brands, initialData }: ProductFormProp
           </select>
         </div>
 
+        {/* Main Image */}
         <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="file">Product Image {!initialData && <span className="text-destructive">*</span>}</Label>
+          <Label htmlFor="file">Product Main Image (Thumbnail) {!initialData && <span className="text-destructive">*</span>}</Label>
           <Input 
             id="file" 
             type="file" 
@@ -170,18 +221,65 @@ export function ProductForm({ categories, brands, initialData }: ProductFormProp
             className="cursor-pointer"
           />
           <p className="text-xs text-muted-foreground mt-1">
-            {initialData ? "Leave empty to keep existing image. " : ""}
+            {initialData ? "Leave empty to keep existing main image. " : ""}
             Image will be automatically compressed before uploading.
           </p>
           
           {preview && (
             <div className="mt-4 w-40 h-40 relative rounded-md border overflow-hidden">
-              <img src={preview} alt="Preview" className="object-cover w-full h-full" />
+              <img src={preview} alt="Main Preview" className="object-cover w-full h-full" />
             </div>
           )}
         </div>
 
-        <div className="space-y-2 md:col-span-2">
+        {/* Detailed Images */}
+        <div className="space-y-2 md:col-span-2 pt-4 border-t">
+          <Label htmlFor="detailedFiles">Detailed Images (Max 5)</Label>
+          <Input 
+            id="detailedFiles" 
+            type="file" 
+            multiple
+            accept="image/*" 
+            onChange={handleDetailedFileChange} 
+            disabled={isSubmitting || existingDetailedImages.length + detailedFiles.length >= 5}
+            className="cursor-pointer"
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Upload up to 5 additional images for the product gallery.
+          </p>
+          
+          <div className="flex flex-wrap gap-4 mt-4">
+            {/* Existing Detailed Images */}
+            {existingDetailedImages.map((url, i) => (
+              <div key={`existing-${i}`} className="w-24 h-24 relative rounded-md border overflow-hidden group">
+                <img src={url} alt={`Existing Detailed ${i}`} className="object-cover w-full h-full" />
+                <button 
+                  type="button" 
+                  onClick={() => removeExistingDetailedImage(i)}
+                  className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+            
+            {/* New Detailed Images */}
+            {detailedPreviews.map((url, i) => (
+              <div key={`new-${i}`} className="w-24 h-24 relative rounded-md border overflow-hidden group border-primary/50">
+                <img src={url} alt={`New Detailed ${i}`} className="object-cover w-full h-full opacity-70" />
+                <button 
+                  type="button" 
+                  onClick={() => removeDetailedFile(i)}
+                  className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-2 md:col-span-2 pt-4 border-t">
           <Label htmlFor="description">Description <span className="text-destructive">*</span></Label>
           <Textarea 
             id="description" 
@@ -207,7 +305,7 @@ export function ProductForm({ categories, brands, initialData }: ProductFormProp
         </div>
       </div>
 
-      <div className="pt-4 border-t border-border">
+      <div className="pt-4 border-t border-border mt-6">
         <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? "Processing..." : (initialData ? "Save Changes" : "Save Product")}
         </Button>

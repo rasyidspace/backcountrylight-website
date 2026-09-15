@@ -19,8 +19,8 @@ export default async function ShopProductPage({ params }: { params: Promise<{ sl
     notFound();
   }
 
-  // Create an array of mock images based on the single image for the gallery
-  const images = [product.image, product.image, product.image, product.image];
+  // Combine the main image with the detailed images for the gallery
+  const images = [product.image, ...(product.images || [])];
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl py-12 md:py-24">
