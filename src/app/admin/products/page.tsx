@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Plus, Search, ChevronDown } from "lucide-react";
 import { formatRupiah } from "@/lib/utils";
+import { DeleteProductButton } from "@/components/admin/DeleteProductButton";
 
 export default async function ProductsAdminPage() {
   const products = await prisma.product.findMany({
@@ -75,13 +76,14 @@ export default async function ProductsAdminPage() {
                 <th className="px-6 py-4 hidden sm:table-cell">CATEGORY</th>
                 <th className="px-6 py-4 cursor-pointer hover:text-zinc-800">PRICE <span className="text-[10px]">↑↓</span></th>
                 <th className="px-6 py-4 cursor-pointer hover:text-zinc-800">STOCK <span className="text-[10px]">↑↓</span></th>
-                <th className="px-6 py-4 text-right">STATUS</th>
+                <th className="px-6 py-4 text-center">STATUS</th>
+                <th className="px-6 py-4 text-right">ACTIONS</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100">
               {products.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-zinc-500">
+                  <td colSpan={8} className="px-6 py-8 text-center text-zinc-500">
                     No products found. Create one to get started.
                   </td>
                 </tr>
@@ -120,7 +122,7 @@ export default async function ProductsAdminPage() {
                       <td className={`px-6 py-4 font-medium ${isOutOfStock || isLowStock ? 'text-red-500' : 'text-zinc-900'}`}>
                         {product.stock}
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-6 py-4 text-center">
                         <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${
                           isOutOfStock 
                             ? "bg-red-50 text-red-700 border-red-200" 
@@ -128,6 +130,9 @@ export default async function ProductsAdminPage() {
                         }`}>
                           {isOutOfStock ? "Out of Stock" : "Active"}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <DeleteProductButton id={product.id} />
                       </td>
                     </tr>
                   )
