@@ -37,10 +37,10 @@ export function DeleteProductButton({ id }: { id: string }) {
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:bg-red-50 hover:text-red-600 transition-colors" title="Delete Product">
-          <Trash2 className="w-4 h-4" />
-        </Button>
+      <DialogTrigger render={
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:bg-red-50 hover:text-red-600 transition-colors" title="Delete Product" />
+      }>
+        <Trash2 className="w-4 h-4" />
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -51,8 +51,8 @@ export function DeleteProductButton({ id }: { id: string }) {
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+          <DialogClose render={<Button variant="outline" />}>
+            Cancel
           </DialogClose>
           <Button 
             onClick={handleDelete}
