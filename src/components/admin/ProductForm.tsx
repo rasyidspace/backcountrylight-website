@@ -15,6 +15,7 @@ type ProductData = {
   id: string;
   sku?: string | null;
   name: string;
+  slug?: string;
   description: string;
   price: number;
   stock: number;
