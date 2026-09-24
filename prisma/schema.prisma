@@ -9,8 +9,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 enum Role {
@@ -97,6 +98,7 @@ model Brand {
 
 model Product {
   id             String   @id @default(cuid())
+  sku            String?  @unique
   name           String
   slug           String   @unique
   description    String   @db.Text

@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ProductForm } from "@/components/admin/ProductForm";
+import { ArrowLeft } from "lucide-react";
 
 export default async function NewProductPage() {
   const [categories, brands] = await Promise.all([
@@ -10,15 +11,15 @@ export default async function NewProductPage() {
   ]);
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
-      <div className="flex items-center justify-between border-b pb-4">
-        <div>
-          <h1 className="text-3xl font-heading font-bold tracking-tight">Add Product</h1>
-          <p className="text-muted-foreground mt-1">Add a new item with auto-compressed image.</p>
-        </div>
-        <Link href="/admin/products">
-          <Button variant="outline">Cancel</Button>
+    <div className="max-w-5xl mx-auto space-y-6">
+      <div className="flex items-center gap-4 mb-2">
+        <Link href="/admin/products" className="p-2 -ml-2 hover:bg-zinc-100 rounded-full transition-colors">
+          <ArrowLeft className="w-5 h-5 text-zinc-600" />
         </Link>
+        <div>
+          <h1 className="text-2xl font-medium text-zinc-900 tracking-tight">Add Product</h1>
+          <p className="text-sm text-zinc-500 mt-0.5">Create a new inventory item.</p>
+        </div>
       </div>
 
       <ProductForm categories={categories} brands={brands} />

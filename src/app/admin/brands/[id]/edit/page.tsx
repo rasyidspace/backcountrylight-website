@@ -22,7 +22,7 @@ export default async function EditBrandPage({ params }: { params: Promise<{ id: 
     <div className="max-w-2xl mx-auto space-y-8">
       <div className="flex items-center justify-between border-b pb-4">
         <div>
-          <h1 className="text-3xl font-heading font-bold tracking-tight">Edit Brand</h1>
+          <h1 className="text-3xl font-medium tracking-tight">Edit Brand</h1>
           <p className="text-muted-foreground mt-1">Update brand information.</p>
         </div>
         <Link href="/admin/brands">

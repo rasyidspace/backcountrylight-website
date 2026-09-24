@@ -14,6 +14,9 @@ export async function createProduct(formData: FormData) {
   const image = formData.get("image") as string;
   const images = formData.getAll("images") as string[];
   const isFeatured = formData.get("isFeatured") === "on";
+  
+  const rawSku = formData.get("sku") as string;
+  const sku = rawSku?.trim() ? rawSku.trim() : null;
 
   const slug = name.toLowerCase().replace(/[\s_]+/g, "-").replace(/[^\w-]+/g, "");
 
@@ -25,6 +28,7 @@ export async function createProduct(formData: FormData) {
     await prisma.product.create({
       data: {
         name,
+        sku,
         slug,
         description,
         price,
@@ -36,8 +40,9 @@ export async function createProduct(formData: FormData) {
         isFeatured,
       },
     });
-  } catch (error) {
-    return { error: "Failed to create product. Name might already exist." };
+  } catch (error: any) {
+    console.error("Create product error:", error);
+    return { error: error.message || "Failed to create product." };
   }
 
   revalidatePath("/admin/products");
@@ -55,6 +60,9 @@ export async function updateProduct(id: string, formData: FormData) {
   const images = formData.getAll("images") as string[];
   const isFeatured = formData.get("isFeatured") === "on";
 
+  const rawSku = formData.get("sku") as string;
+  const sku = rawSku?.trim() ? rawSku.trim() : null;
+
   const slug = name.toLowerCase().replace(/[\s_]+/g, "-").replace(/[^\w-]+/g, "");
 
   if (!name || !price || !categoryId || !brandId) {
@@ -63,6 +71,7 @@ export async function updateProduct(id: string, formData: FormData) {
 
   const dataToUpdate: any = {
     name,
+    sku,
     slug,
     description,
     price,
@@ -85,8 +94,9 @@ export async function updateProduct(id: string, formData: FormData) {
       where: { id },
       data: dataToUpdate,
     });
-  } catch (error) {
-    return { error: "Failed to update product. Name might already exist." };
+  } catch (error: any) {
+    console.error("Update product error:", error);
+    return { error: error.message || "Failed to update product." };
   }
 
   revalidatePath("/admin/products");

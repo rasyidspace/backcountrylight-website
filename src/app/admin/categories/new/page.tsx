@@ -10,7 +10,7 @@ export default function NewCategoryPage() {
     <div className="max-w-2xl mx-auto space-y-8">
       <div className="flex items-center justify-between border-b pb-4">
         <div>
-          <h1 className="text-3xl font-heading font-bold tracking-tight">Add Category</h1>
+          <h1 className="text-3xl font-medium tracking-tight">Add Category</h1>
           <p className="text-muted-foreground mt-1">Create a new product category.</p>
         </div>
         <Link href="/admin/categories">

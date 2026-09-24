@@ -24,7 +24,7 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-heading font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-3xl font-medium tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground mt-2">
           Welcome back, {session?.user?.name || "Admin"}! Here's an overview of your store.
         </p>
@@ -40,7 +40,7 @@ export default async function AdminDashboardPage() {
               <h3 className="tracking-tight text-sm font-medium">{stat.name}</h3>
               <stat.icon className="h-4 w-4 text-muted-foreground" />
             </div>
-            <div className="text-3xl font-bold">{stat.value}</div>
+            <div className="text-3xl font-medium">{stat.value}</div>
           </div>
         ))}
       </div>

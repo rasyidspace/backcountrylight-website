@@ -13,6 +13,7 @@ type Category = { id: string; name: string };
 type Brand = { id: string; name: string };
 type ProductData = {
   id: string;
+  sku?: string | null;
   name: string;
   description: string;
   price: number;
@@ -41,6 +42,9 @@ export function ProductForm({ categories, brands, initialData }: ProductFormProp
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  const [nameInput, setNameInput] = useState(initialData?.name || "");
+  const slugPreview = nameInput.toLowerCase().replace(/[\s_]+/g, "-").replace(/[^\w-]+/g, "");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -151,164 +155,243 @@ export function ProductForm({ categories, brands, initialData }: ProductFormProp
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 bg-card p-6 rounded-xl border">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
         <div className="bg-destructive/15 text-destructive p-3 rounded-md text-sm border border-destructive/20">
           {error}
         </div>
       )}
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="name">Product Name <span className="text-destructive">*</span></Label>
-          <Input id="name" name="name" required defaultValue={initialData?.name} placeholder="e.g. X-Mid Pro 2" disabled={isSubmitting} />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="price">Price (IDR) <span className="text-destructive">*</span></Label>
-          <Input id="price" name="price" type="number" required min="0" defaultValue={initialData?.price} placeholder="e.g. 15000000" disabled={isSubmitting} />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="stock">Stock Quantity <span className="text-destructive">*</span></Label>
-          <Input id="stock" name="stock" type="number" required min="0" defaultValue={initialData?.stock ?? 10} disabled={isSubmitting} />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="categoryId">Category <span className="text-destructive">*</span></Label>
-          <select 
-            id="categoryId" 
-            name="categoryId" 
-            required 
-            defaultValue={initialData?.categoryId || ""}
-            disabled={isSubmitting}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <option value="">Select a category</option>
-            {categories.map(c => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="brandId">Brand <span className="text-destructive">*</span></Label>
-          <select 
-            id="brandId" 
-            name="brandId" 
-            required 
-            defaultValue={initialData?.brandId || ""}
-            disabled={isSubmitting}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <option value="">Select a brand</option>
-            {brands.map(b => (
-              <option key={b.id} value={b.id}>{b.name}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Main Image */}
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="file">Product Main Image (Thumbnail) {!initialData && <span className="text-destructive">*</span>}</Label>
-          <Input 
-            id="file" 
-            type="file" 
-            accept="image/*" 
-            required={!initialData} 
-            onChange={handleFileChange} 
-            disabled={isSubmitting}
-            className="cursor-pointer"
-          />
-          <p className="text-xs text-muted-foreground mt-1">
-            {initialData ? "Leave empty to keep existing main image. " : ""}
-            Image will be automatically compressed before uploading.
-          </p>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Left Column - Main Content */}
+        <div className="lg:col-span-2 space-y-8">
           
-          {preview && (
-            <div className="mt-4 w-40 h-40 relative rounded-md border overflow-hidden">
-              <img src={preview} alt="Main Preview" className="object-cover w-full h-full" />
+          {/* Product Information Card */}
+          <div className="bg-white border rounded-xl p-6 shadow-sm">
+            <h2 className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-4">Product Information</h2>
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="name">Title <span className="text-destructive">*</span></Label>
+                <Input 
+                  id="name" 
+                  name="name" 
+                  required 
+                  value={nameInput}
+                  onChange={(e) => setNameInput(e.target.value)}
+                  placeholder="e.g. 4Flex for Windmaster - SOD-460" 
+                  disabled={isSubmitting} 
+                  className="bg-zinc-50/50"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="slug">Slug</Label>
+                <Input 
+                  id="slug" 
+                  value={initialData?.slug || slugPreview} 
+                  readOnly 
+                  disabled 
+                  className="bg-zinc-100 text-zinc-500 cursor-not-allowed"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Description <span className="text-destructive">*</span></Label>
+                <Textarea 
+                  id="description" 
+                  name="description" 
+                  required
+                  defaultValue={initialData?.description || ""}
+                  disabled={isSubmitting}
+                  placeholder="Detailed product description..." 
+                  className="min-h-[250px] bg-zinc-50/50 resize-y"
+                />
+              </div>
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* Detailed Images */}
-        <div className="space-y-2 md:col-span-2 pt-4 border-t">
-          <Label htmlFor="detailedFiles">Detailed Images (Max 5)</Label>
-          <Input 
-            id="detailedFiles" 
-            type="file" 
-            multiple
-            accept="image/*" 
-            onChange={handleDetailedFileChange} 
-            disabled={isSubmitting || existingDetailedImages.length + detailedFiles.length >= 5}
-            className="cursor-pointer"
-          />
-          <p className="text-xs text-muted-foreground mt-1">
-            Upload up to 5 additional images for the product gallery.
-          </p>
-          
-          <div className="flex flex-wrap gap-4 mt-4">
-            {/* Existing Detailed Images */}
-            {existingDetailedImages.map((url, i) => (
-              <div key={`existing-${i}`} className="w-24 h-24 relative rounded-md border overflow-hidden group">
-                <img src={url} alt={`Existing Detailed ${i}`} className="object-cover w-full h-full" />
-                <button 
-                  type="button" 
-                  onClick={() => removeExistingDetailedImage(i)}
-                  className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
+          {/* Product Images Card */}
+          <div className="bg-white border rounded-xl p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Product Images</h2>
+              <span className="text-xs text-zinc-400">{existingDetailedImages.length + detailedFiles.length + (preview ? 1 : 0)} / 6 images</span>
+            </div>
             
-            {/* New Detailed Images */}
-            {detailedPreviews.map((url, i) => (
-              <div key={`new-${i}`} className="w-24 h-24 relative rounded-md border overflow-hidden group border-primary/50">
-                <img src={url} alt={`New Detailed ${i}`} className="object-cover w-full h-full opacity-70" />
-                <button 
-                  type="button" 
-                  onClick={() => removeDetailedFile(i)}
-                  className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {/* Main Image */}
+              <div className="relative aspect-square rounded-md border-2 border-zinc-200 overflow-hidden group bg-zinc-50">
+                {preview ? (
+                  <>
+                    <img src={preview} alt="Main Preview" className="object-cover w-full h-full" />
+                    <div className="absolute top-2 left-2 bg-zinc-900 text-white text-[10px] font-medium px-2 py-0.5 rounded tracking-wider">
+                      MAIN
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center justify-center w-full h-full text-zinc-400">
+                    <span className="text-sm">No Main</span>
+                  </div>
+                )}
               </div>
-            ))}
+
+              {/* Existing Detailed Images */}
+              {existingDetailedImages.map((url, i) => (
+                <div key={`existing-${i}`} className="relative aspect-square rounded-md border border-zinc-200 overflow-hidden group bg-zinc-50">
+                  <img src={url} alt={`Existing Detailed ${i}`} className="object-cover w-full h-full" />
+                  <button 
+                    type="button" 
+                    onClick={() => removeExistingDetailedImage(i)}
+                    className="absolute top-2 right-2 bg-white/90 text-zinc-900 rounded-md p-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-red-50 hover:text-red-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+              
+              {/* New Detailed Images */}
+              {detailedPreviews.map((url, i) => (
+                <div key={`new-${i}`} className="relative aspect-square rounded-md border-2 border-primary/50 overflow-hidden group bg-zinc-50">
+                  <img src={url} alt={`New Detailed ${i}`} className="object-cover w-full h-full opacity-80" />
+                  <button 
+                    type="button" 
+                    onClick={() => removeDetailedFile(i)}
+                    className="absolute top-2 right-2 bg-white/90 text-zinc-900 rounded-md p-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-red-50 hover:text-red-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+
+              {/* Add Image Button */}
+              <div className="relative aspect-square rounded-md border-2 border-dashed border-zinc-300 hover:border-zinc-400 transition-colors bg-zinc-50/50 flex flex-col items-center justify-center overflow-hidden">
+                <span className="text-2xl text-zinc-400 mb-1">+</span>
+                <span className="text-xs text-zinc-500 font-medium">Add Image</span>
+                
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  multiple={!!preview}
+                  required={!initialData && !preview}
+                  onChange={(e) => {
+                    if (!preview) {
+                      handleFileChange(e);
+                    } else {
+                      handleDetailedFileChange(e);
+                    }
+                  }}
+                  disabled={isSubmitting || (preview ? existingDetailedImages.length + detailedFiles.length >= 5 : false)}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                />
+              </div>
+            </div>
+            <p className="text-xs text-zinc-400 mt-4">
+              Upload up to 6 product images (1 Main, 5 Additional). 
+            </p>
           </div>
         </div>
 
-        <div className="space-y-2 md:col-span-2 pt-4 border-t">
-          <Label htmlFor="description">Description <span className="text-destructive">*</span></Label>
-          <Textarea 
-            id="description" 
-            name="description" 
-            required
-            defaultValue={initialData?.description || ""}
-            disabled={isSubmitting}
-            placeholder="Detailed product description..." 
-            className="min-h-[150px]"
-          />
-        </div>
+        {/* Right Column - Metadata & Actions */}
+        <div className="lg:col-span-1 space-y-8">
+          
+          {/* Pricing & Stock Card */}
+          <div className="bg-white border rounded-xl p-6 shadow-sm">
+            <h2 className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-4">Pricing & Stock</h2>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="price">Price (IDR) <span className="text-destructive">*</span></Label>
+                <Input id="price" name="price" type="number" required min="0" defaultValue={initialData?.price} placeholder="e.g. 340000" disabled={isSubmitting} className="bg-zinc-50/50" />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="comparePrice" className="text-zinc-400">Compare at Price (IDR)</Label>
+                <Input id="comparePrice" type="number" disabled placeholder="0" className="bg-zinc-100 text-zinc-400 cursor-not-allowed" />
+              </div>
 
-        <div className="space-y-2 md:col-span-2 flex items-center gap-2">
-          <input 
-            type="checkbox" 
-            id="isFeatured" 
-            name="isFeatured" 
-            defaultChecked={initialData?.isFeatured}
-            className="h-4 w-4 rounded border-gray-300" 
-            disabled={isSubmitting} 
-          />
-          <Label htmlFor="isFeatured" className="font-normal cursor-pointer">Feature this product on the homepage</Label>
-        </div>
-      </div>
+              <div className="space-y-2">
+                <Label htmlFor="stock">Stock <span className="text-destructive">*</span></Label>
+                <Input id="stock" name="stock" type="number" required min="0" defaultValue={initialData?.stock ?? 0} disabled={isSubmitting} className="bg-zinc-50/50" />
+              </div>
 
-      <div className="pt-4 border-t border-border mt-6">
-        <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Processing..." : (initialData ? "Save Changes" : "Save Product")}
-        </Button>
+              <div className="space-y-2">
+                <Label htmlFor="weight" className="text-zinc-400">Weight (grams)</Label>
+                <Input id="weight" type="number" disabled placeholder="100" className="bg-zinc-100 text-zinc-400 cursor-not-allowed" />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="sku">SKU (Optional)</Label>
+                <Input id="sku" name="sku" defaultValue={initialData?.sku || ""} placeholder="e.g. SOD-460" disabled={isSubmitting} className="bg-zinc-50/50" />
+              </div>
+            </div>
+          </div>
+
+          {/* Organization Card */}
+          <div className="bg-white border rounded-xl p-6 shadow-sm">
+            <h2 className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-4">Organization</h2>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="categoryId">Category <span className="text-destructive">*</span></Label>
+                <select 
+                  id="categoryId" 
+                  name="categoryId" 
+                  required 
+                  defaultValue={initialData?.categoryId || ""}
+                  disabled={isSubmitting}
+                  className="flex h-10 w-full rounded-md border border-zinc-200 bg-zinc-50/50 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="">Select a category</option>
+                  {categories.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="brandId">Brand <span className="text-destructive">*</span></Label>
+                <select 
+                  id="brandId" 
+                  name="brandId" 
+                  required 
+                  defaultValue={initialData?.brandId || ""}
+                  disabled={isSubmitting}
+                  className="flex h-10 w-full rounded-md border border-zinc-200 bg-zinc-50/50 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="">Select a brand</option>
+                  {brands.map(b => (
+                    <option key={b.id} value={b.id}>{b.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="pt-4 border-t mt-4">
+                <div className="flex items-center justify-between bg-green-50/50 p-3 rounded-md border border-green-100">
+                  <Label htmlFor="isFeatured" className="font-medium cursor-pointer text-green-700">Status (Active)</Label>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      id="isFeatured" 
+                      name="isFeatured" 
+                      defaultChecked={initialData ? initialData.isFeatured : true}
+                      disabled={isSubmitting}
+                      className="sr-only peer" 
+                    />
+                    <div className="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="grid grid-cols-2 gap-4 pt-2">
+            <Button type="button" variant="outline" className="w-full bg-white" onClick={() => window.history.back()} disabled={isSubmitting}>
+              Cancel
+            </Button>
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : "Save"}
+            </Button>
+          </div>
+        </div>
       </div>
     </form>
   );
