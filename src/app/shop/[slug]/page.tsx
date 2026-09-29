@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { ProductGallery } from "@/components/shared/ProductGallery";
 import { Button } from "@/components/ui/button";
-import { AddToCartButton } from "@/components/shared/AddToCartButton";
+import { ProductVariantSelector } from "@/components/shared/ProductVariantSelector";
 
 import Link from "next/link";
 import { formatRupiah } from "@/lib/utils";
@@ -12,7 +12,7 @@ export default async function ShopProductPage({ params }: { params: Promise<{ sl
   const { slug } = await params;
   const product = await prisma.product.findUnique({
     where: { slug },
-    include: { brand: true, category: true }
+    include: { brand: true, category: true, options: true, variants: true }
   });
 
   if (!product) {
@@ -43,25 +43,11 @@ export default async function ShopProductPage({ params }: { params: Promise<{ sl
           <p className="text-sm text-muted-foreground uppercase tracking-widest mb-2">{product.brand.name}</p>
           <h1 className="text-3xl md:text-4xl font-heading font-medium tracking-tight mb-4">{product.name}</h1>
           
-          <div className="text-2xl font-medium mb-6">
-            {formatRupiah(product.price)}
-          </div>
-
           <p className="text-lg text-muted-foreground mb-8">
             {product.description}
           </p>
 
-          <div className="space-y-4 mb-10">
-            <AddToCartButton 
-              product={{
-                id: product.id,
-                name: product.name,
-                price: product.price,
-                image: product.image,
-                stock: product.stock,
-              }} 
-            />
-          </div>
+          <ProductVariantSelector product={product} />
 
           <Accordion className="w-full" defaultValue={["shipping"]}>
             <AccordionItem value="shipping">

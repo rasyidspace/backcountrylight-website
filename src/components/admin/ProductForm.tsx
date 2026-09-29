@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { updateProduct, createProduct } from "@/app/actions/products";
 import imageCompression from "browser-image-compression";
 import { X } from "lucide-react";
+import { ProductVariantsEditor, ProductOption, ProductVariant } from "./ProductVariantsEditor";
 
 type Category = { id: string; name: string };
 type Brand = { id: string; name: string };
@@ -24,6 +25,8 @@ type ProductData = {
   image: string;
   images?: string[];
   isFeatured: boolean;
+  options?: any[];
+  variants?: any[];
 };
 
 interface ProductFormProps {
@@ -46,6 +49,22 @@ export function ProductForm({ categories, brands, initialData }: ProductFormProp
 
   const [nameInput, setNameInput] = useState(initialData?.name || "");
   const slugPreview = nameInput.toLowerCase().replace(/[\s_]+/g, "-").replace(/[^\w-]+/g, "");
+  
+  // Base Price for variants
+  const [basePrice, setBasePrice] = useState<number>(initialData?.price || 0);
+
+  // Options & Variants State
+  const [options, setOptions] = useState<ProductOption[]>(
+    initialData?.options?.map(opt => ({ name: opt.name, values: opt.values })) || []
+  );
+  const [variants, setVariants] = useState<ProductVariant[]>(
+    initialData?.variants?.map(v => ({
+      options: v.options,
+      price: v.price?.toString() || "",
+      stock: v.stock?.toString() || "0",
+      sku: v.sku || "",
+    })) || []
+  );
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -92,7 +111,7 @@ export function ProductForm({ categories, brands, initialData }: ProductFormProp
     try {
       const formData = new FormData(e.currentTarget);
       
-      const options = {
+      const compressionOptions = {
         maxSizeMB: 0.5, // 500KB
         maxWidthOrHeight: 1200,
         useWebWorker: true,
@@ -100,7 +119,7 @@ export function ProductForm({ categories, brands, initialData }: ProductFormProp
 
       // 1. Upload main image
       if (file) {
-        const compressedFile = await imageCompression(file, options);
+        const compressedFile = await imageCompression(file, compressionOptions);
         const uploadData = new FormData();
         uploadData.append("file", compressedFile, compressedFile.name);
         
@@ -120,7 +139,7 @@ export function ProductForm({ categories, brands, initialData }: ProductFormProp
       // 2. Upload new detailed images sequentially
       const newUrls: string[] = [];
       for (const detailedFile of detailedFiles) {
-        const compressed = await imageCompression(detailedFile, options);
+        const compressed = await imageCompression(detailedFile, compressionOptions);
         const uploadData = new FormData();
         uploadData.append("file", compressed, compressed.name);
         
@@ -136,6 +155,23 @@ export function ProductForm({ categories, brands, initialData }: ProductFormProp
       // Append all existing and new detailed images to FormData
       existingDetailedImages.forEach(url => formData.append("images", url));
       newUrls.forEach(url => formData.append("images", url));
+
+      // Append Options & Variants
+      if (options.length > 0) {
+        formData.append("options", JSON.stringify(options.filter(o => o.name && o.values.length > 0)));
+      }
+      if (variants.length > 0) {
+        // ensure stock and price are numeric before sending if possible, but our action uses the strings as well. Actually, action expects numeric? 
+        // Let's pass as is, the action handles it as any or string, wait action uses v.price and v.stock.
+        // Action: stock: v.stock || 0 (if it's string, we need to parse it in action, or parse here)
+        // Let's parse here to be safe.
+        const parsedVariants = variants.map(v => ({
+          ...v,
+          price: v.price ? parseInt(v.price, 10) : null,
+          stock: parseInt(v.stock, 10) || 0,
+        }));
+        formData.append("variants", JSON.stringify(parsedVariants));
+      }
 
       // 3. Call Server Action
       let result;
@@ -211,6 +247,14 @@ export function ProductForm({ categories, brands, initialData }: ProductFormProp
               </div>
             </div>
           </div>
+
+          <ProductVariantsEditor 
+            options={options} 
+            setOptions={setOptions} 
+            variants={variants} 
+            setVariants={setVariants} 
+            basePrice={basePrice}
+          />
 
           {/* Product Images Card */}
           <div className="bg-white border rounded-xl p-6 shadow-sm">
@@ -301,7 +345,18 @@ export function ProductForm({ categories, brands, initialData }: ProductFormProp
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="price">Price (IDR) <span className="text-destructive">*</span></Label>
-                <Input id="price" name="price" type="number" required min="0" defaultValue={initialData?.price} placeholder="e.g. 340000" disabled={isSubmitting} className="bg-zinc-50/50" />
+                <Input 
+                  id="price" 
+                  name="price" 
+                  type="number" 
+                  required 
+                  min="0" 
+                  value={basePrice || ""} 
+                  onChange={(e) => setBasePrice(parseInt(e.target.value) || 0)}
+                  placeholder="e.g. 340000" 
+                  disabled={isSubmitting} 
+                  className="bg-zinc-50/50" 
+                />
               </div>
               
               <div className="space-y-2">

@@ -15,6 +15,17 @@ export async function createProduct(formData: FormData) {
   const images = formData.getAll("images") as string[];
   const isFeatured = formData.get("isFeatured") === "on";
   
+  const optionsRaw = formData.get("options") as string;
+  const variantsRaw = formData.get("variants") as string;
+  let options = [];
+  let variants = [];
+  if (optionsRaw) {
+    try { options = JSON.parse(optionsRaw); } catch(e) {}
+  }
+  if (variantsRaw) {
+    try { variants = JSON.parse(variantsRaw); } catch(e) {}
+  }
+  
   const rawSku = formData.get("sku") as string;
   const sku = rawSku?.trim() ? rawSku.trim() : null;
 
@@ -38,6 +49,21 @@ export async function createProduct(formData: FormData) {
         image,
         images,
         isFeatured,
+        options: options.length > 0 ? {
+          create: options.map((opt: any) => ({
+            name: opt.name,
+            values: opt.values,
+          }))
+        } : undefined,
+        variants: variants.length > 0 ? {
+          create: variants.map((v: any) => ({
+            name: Object.values(v.options).join(" / "),
+            sku: v.sku || null,
+            price: v.price ? parseInt(v.price, 10) : null,
+            stock: v.stock ? parseInt(v.stock, 10) : 0,
+            options: v.options,
+          }))
+        } : undefined,
       },
     });
   } catch (error: any) {
@@ -60,6 +86,17 @@ export async function updateProduct(id: string, formData: FormData) {
   const images = formData.getAll("images") as string[];
   const isFeatured = formData.get("isFeatured") === "on";
 
+  const optionsRaw = formData.get("options") as string;
+  const variantsRaw = formData.get("variants") as string;
+  let options = [];
+  let variants = [];
+  if (optionsRaw) {
+    try { options = JSON.parse(optionsRaw); } catch(e) {}
+  }
+  if (variantsRaw) {
+    try { variants = JSON.parse(variantsRaw); } catch(e) {}
+  }
+
   const rawSku = formData.get("sku") as string;
   const sku = rawSku?.trim() ? rawSku.trim() : null;
 
@@ -79,6 +116,23 @@ export async function updateProduct(id: string, formData: FormData) {
     categoryId,
     brandId,
     isFeatured,
+    options: {
+      deleteMany: {},
+      create: options.map((opt: any) => ({
+        name: opt.name,
+        values: opt.values,
+      }))
+    },
+    variants: {
+      deleteMany: {},
+      create: variants.map((v: any) => ({
+        name: Object.values(v.options).join(" / "),
+        sku: v.sku || null,
+        price: v.price ? parseInt(v.price, 10) : null,
+        stock: v.stock ? parseInt(v.stock, 10) : 0,
+        options: v.options,
+      }))
+    },
   };
 
   // Only update main image if a new one is provided

@@ -118,6 +118,8 @@ model Product {
   brand          Brand    @relation(fields: [brandId], references: [id])
 
   orderItems     OrderItem[]
+  options        ProductOption[]
+  variants       ProductVariant[]
 }
 
 model Order {
@@ -139,6 +141,8 @@ model OrderItem {
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productId String
   product   Product @relation(fields: [productId], references: [id])
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id])
   quantity  Int
   price     Int     // Snapshot of price at the time of purchase
 }
@@ -163,4 +167,25 @@ model Address {
   isDefault   Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model ProductOption {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name        String
+  values      String[]
+}
+
+model ProductVariant {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name        String
+  sku         String?  @unique
+  price       Int?
+  stock       Int      @default(0)
+  options     Json
+  
+  orderItems  OrderItem[]
 }
