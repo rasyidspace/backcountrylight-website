@@ -214,6 +214,17 @@ export async function submitMembershipPaymentProof(data: SubmitMembershipProofPa
     return { error: "Semua data konfirmasi pembayaran wajib diisi." };
   }
 
+  let proofUrl: URL;
+  try {
+    proofUrl = new URL(data.paymentProofUrl);
+  } catch {
+    return { error: "URL bukti pembayaran tidak valid. Silakan unggah ulang bukti transfer." };
+  }
+
+  if (proofUrl.protocol !== "http:" && proofUrl.protocol !== "https:") {
+    return { error: "Bukti pembayaran belum tersimpan. Silakan unggah ulang bukti transfer." };
+  }
+
   try {
     const order = await prisma.membershipOrder.findUnique({
       where: { id: data.orderId },

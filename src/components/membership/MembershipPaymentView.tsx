@@ -67,8 +67,12 @@ export function MembershipPaymentView({ order }: MembershipPaymentViewProps) {
   const [transferAmount, setTransferAmount] = useState<string>(
     order.transferAmount ? String(order.transferAmount) : String(order.amount)
   );
-  const [proofFile, setProofFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(order.paymentProofUrl || null);
+  const [storedProofUrl, setStoredProofUrl] = useState<string | null>(
+    order.paymentProofUrl && !order.paymentProofUrl.startsWith("blob:")
+      ? order.paymentProofUrl
+      : null
+  );
+  const [previewUrl, setPreviewUrl] = useState<string | null>(storedProofUrl);
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isProofModalOpen, setIsProofModalOpen] = useState(false);
@@ -77,7 +81,7 @@ export function MembershipPaymentView({ order }: MembershipPaymentViewProps) {
   const isPending = order.paymentStatus === "PENDING_VERIFICATION";
   const isRejected = order.paymentStatus === "REJECTED";
 
-  // Handle File Change & Upload ke /api/upload
+  // Handle File Change & Upload ke storage
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -92,7 +96,6 @@ export function MembershipPaymentView({ order }: MembershipPaymentViewProps) {
       return;
     }
 
-    setProofFile(file);
     const localPreview = URL.createObjectURL(file);
     setPreviewUrl(localPreview);
 
@@ -102,7 +105,7 @@ export function MembershipPaymentView({ order }: MembershipPaymentViewProps) {
       const formData = new FormData();
       formData.append("file", file);
 
-      const res = await fetch("/api/upload", {
+      const res = await fetch("/api/upload/payment-proof", {
         method: "POST",
         body: formData,
       });
@@ -112,11 +115,12 @@ export function MembershipPaymentView({ order }: MembershipPaymentViewProps) {
         throw new Error(json.error || "Gagal mengunggah foto bukti.");
       }
 
+      setStoredProofUrl(json.url);
       setPreviewUrl(json.url);
       toast.success("Foto bukti transfer berhasil diunggah.");
-    } catch (err: any) {
-      toast.error(err.message || "Gagal mengunggah gambar bukti pembayaran.");
-      setProofFile(null);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Gagal mengunggah gambar bukti pembayaran.");
+      setPreviewUrl(storedProofUrl);
     } finally {
       setIsUploading(false);
     }
@@ -126,7 +130,7 @@ export function MembershipPaymentView({ order }: MembershipPaymentViewProps) {
   const handleSubmitConfirmation = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!previewUrl) {
+    if (!storedProofUrl) {
       toast.error("Silakan unggah foto/screenshot bukti transfer terlebih dahulu.");
       return;
     }
@@ -141,7 +145,7 @@ export function MembershipPaymentView({ order }: MembershipPaymentViewProps) {
       setIsSubmitting(true);
       const res = await submitMembershipPaymentProof({
         orderId: order.id,
-        paymentProofUrl: previewUrl,
+        paymentProofUrl: storedProofUrl,
         senderName: senderName.trim(),
         senderBank: senderBank.trim(),
         transferAmount: numericAmount,
@@ -154,8 +158,8 @@ export function MembershipPaymentView({ order }: MembershipPaymentViewProps) {
 
       toast.success("Konfirmasi pembayaran berhasil dikirim! Menunggu verifikasi tim BCL.");
       router.refresh();
-    } catch (err: any) {
-      toast.error(err.message || "Gagal mengirim konfirmasi pembayaran.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Gagal mengirim konfirmasi pembayaran.");
     } finally {
       setIsSubmitting(false);
     }
@@ -362,7 +366,7 @@ export function MembershipPaymentView({ order }: MembershipPaymentViewProps) {
               <div className="pt-2">
                 <button
                   type="submit"
-                  disabled={isSubmitting || isUploading || !previewUrl}
+                  disabled={isSubmitting || isUploading || !storedProofUrl}
                   className="w-full py-3 px-4 bg-primary text-primary-foreground font-medium rounded-lg text-xs hover:bg-primary/90 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
