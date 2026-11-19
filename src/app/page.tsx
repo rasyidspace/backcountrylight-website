@@ -6,12 +6,43 @@ import { BrandLogo } from "@/components/shared/BrandLogo";
 import prisma from "@/lib/prisma";
 
 export default async function Home() {
-  const featuredProducts = await prisma.product.findMany({
-    where: { isFeatured: true },
-    include: { brand: true },
-    take: 4,
-    orderBy: { createdAt: 'desc' }
-  });
+  const [featuredProducts, categories] = await Promise.all([
+    prisma.product.findMany({
+      where: { isFeatured: true },
+      include: { brand: true },
+      take: 4,
+      orderBy: { createdAt: 'desc' }
+    }),
+    prisma.category.findMany({
+      orderBy: { name: 'asc' }
+    })
+  ]);
+
+  const categoryImages: Record<string, string> = {
+    backpacks: "/tent/tc-product-ognis-dome.webp",
+    shelters: "/tent/tc-product-diafort.webp",
+    "sleep-systems": "/tent/tc-product-tenbi.webp",
+    cooking: "/tent/tc-product-wingfort.webp",
+    accessories: "/tent/tc-philosophy-diafort.webp",
+    camping: "/tent/tc-product-diafort.webp",
+    footwear: "/tent/tc-philosophy-wingfort.webp",
+  };
+
+  // Prioritize curated categories with imagery, or fallback to first 5
+  const priorityCategorySlugs = ["backpacks", "shelters", "sleep-systems", "cooking", "accessories"];
+  const displayCategories = priorityCategorySlugs
+    .map(slug => categories.find(c => c.slug === slug))
+    .filter((c): c is typeof categories[number] => Boolean(c));
+
+  // If some priority categories weren't found, fill up with other categories
+  if (displayCategories.length < 5) {
+    for (const cat of categories) {
+      if (!displayCategories.some(c => c.id === cat.id)) {
+        displayCategories.push(cat);
+        if (displayCategories.length >= 5) break;
+      }
+    }
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -54,20 +85,17 @@ export default async function Home() {
           <h2 className="text-3xl font-heading font-medium">Shop by Category</h2>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
-          {[
-            { name: "Backpacks", image: "/tent/tc-product-ognis-dome.webp" },
-            { name: "Shelters", image: "/tent/tc-product-diafort.webp" },
-            { name: "Sleep Systems", image: "/tent/tc-product-tenbi.webp" },
-            { name: "Cooking", image: "/tent/tc-product-wingfort.webp" },
-            { name: "Accessories", image: "/tent/tc-philosophy-diafort.webp" }
-          ].map((cat) => (
-            <Link key={cat.name} href={`/shop?category=${cat.name.toLowerCase().replace(' ', '-')}`} className="group block">
-              <div className="aspect-square bg-muted relative overflow-hidden mb-4">
-                <Image src={cat.image} alt={cat.name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" />
-              </div>
-              <h3 className="font-heading font-medium text-center group-hover:underline underline-offset-4">{cat.name}</h3>
-            </Link>
-          ))}
+          {displayCategories.map((cat) => {
+            const imageSrc = cat.image || categoryImages[cat.slug] || "/placeholder.webp";
+            return (
+              <Link key={cat.id} href={`/shop?category=${encodeURIComponent(cat.slug)}`} className="group block">
+                <div className="aspect-square bg-muted relative overflow-hidden mb-4">
+                  <Image src={imageSrc} alt={cat.name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" />
+                </div>
+                <h3 className="font-heading font-medium text-center group-hover:underline underline-offset-4">{cat.name}</h3>
+              </Link>
+            );
+          })}
         </div>
       </section>
 

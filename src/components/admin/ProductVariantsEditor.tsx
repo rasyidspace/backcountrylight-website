@@ -13,6 +13,7 @@ export type ProductOption = {
 };
 
 export type ProductVariant = {
+  id?: string;
   options: Record<string, string>;
   price: string;
   stock: string;
@@ -60,12 +61,14 @@ export function ProductVariantsEditor({ options, setOptions, variants, setVarian
 
     const newCombinations = generateCombinations(options);
     
-    // Merge with existing variants to preserve price/stock/sku
+    // Merge with existing variants to preserve id/price/stock/sku
     const newVariants = newCombinations.map(combo => {
-      // Find matching existing variant
+      // Find matching existing variant by options key-value equivalence
+      const comboKeys = Object.keys(combo);
       const existing = variants.find(v => {
-        return Object.keys(combo).every(k => v.options[k] === combo[k]) &&
-               Object.keys(v.options).every(k => v.options[k] === combo[k]);
+        const vKeys = Object.keys(v.options);
+        return vKeys.length === comboKeys.length &&
+               comboKeys.every(k => v.options[k] === combo[k]);
       });
       
       if (existing) return existing;

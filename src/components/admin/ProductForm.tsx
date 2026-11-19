@@ -67,6 +67,7 @@ export function ProductForm({ categories, brands, initialData }: ProductFormProp
 
   const [variants, setVariants] = useState<ProductVariant[]>(
     initialData?.variants?.map(v => ({
+      id: v.id,
       options: v.options,
       price: v.price?.toString() || "",
       stock: v.stock?.toString() || "0",

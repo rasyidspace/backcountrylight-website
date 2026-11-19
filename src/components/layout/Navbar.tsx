@@ -1,18 +1,27 @@
 import Link from "next/link";
 import Image from "next/image";
-import { User, Menu } from "lucide-react";
+import { User, Menu, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SearchDialog } from "@/components/layout/SearchDialog";
 import { CartSidebar } from "@/components/layout/CartSidebar";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet";
-// HMR trigger
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import prisma from "@/lib/prisma";
 
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { ProfileDropdown } from "@/components/layout/ProfileDropdown";
 
 export default async function Navbar() {
-  const session = await getServerSession(authOptions);
+  const [session, categories] = await Promise.all([
+    getServerSession(authOptions),
+    prisma.category.findMany({ orderBy: { name: 'asc' } })
+  ]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -28,7 +37,30 @@ export default async function Navbar() {
           </div>
           
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-            <Link href="/shop" className="transition-colors hover:text-foreground/80">Shop</Link>
+            <div className="flex items-center">
+              <Link href="/shop" className="transition-colors hover:text-foreground/80">
+                Shop
+              </Link>
+              {categories.length > 0 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger render={
+                    <button className="p-1 hover:text-foreground/80 transition-colors cursor-pointer text-muted-foreground focus:outline-none" aria-label="Shop categories dropdown">
+                      <ChevronDown className="h-3.5 w-3.5" />
+                    </button>
+                  } />
+                  <DropdownMenuContent align="start" className="w-48 py-1">
+                    <DropdownMenuItem render={<Link href="/shop" className="font-medium" />}>
+                      All Products
+                    </DropdownMenuItem>
+                    {categories.map((cat) => (
+                      <DropdownMenuItem key={cat.id} render={<Link href={`/shop?category=${encodeURIComponent(cat.slug)}`} />}>
+                        {cat.name}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
             <Link href="/brands" className="transition-colors hover:text-foreground/80">Brands</Link>
             <Link href="/journal" className="transition-colors hover:text-foreground/80">Journal</Link>
             <Link href="/about" className="transition-colors hover:text-foreground/80">About</Link>
@@ -51,9 +83,20 @@ export default async function Navbar() {
                   </SheetTitle>
                 </SheetHeader>
                 <nav className="flex flex-col gap-6 text-lg font-medium mt-4">
-                  <SheetClose nativeButton={false} render={<Link href="/shop" className="transition-colors hover:text-foreground/80 text-left" />}>
-                    Shop
-                  </SheetClose>
+                  <div className="flex flex-col gap-2">
+                    <SheetClose nativeButton={false} render={<Link href="/shop" className="transition-colors hover:text-foreground/80 text-left font-semibold" />}>
+                      Shop
+                    </SheetClose>
+                    <div className="pl-3 flex flex-col gap-2 border-l text-sm font-normal text-muted-foreground mt-1">
+                      {categories.map((cat) => (
+                        <SheetClose key={cat.id} nativeButton={false} render={
+                          <Link href={`/shop?category=${encodeURIComponent(cat.slug)}`} className="hover:text-foreground">
+                            {cat.name}
+                          </Link>
+                        } />
+                      ))}
+                    </div>
+                  </div>
                   <SheetClose nativeButton={false} render={<Link href="/brands" className="transition-colors hover:text-foreground/80 text-left" />}>
                     Brands
                   </SheetClose>

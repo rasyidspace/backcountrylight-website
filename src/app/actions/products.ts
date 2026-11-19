@@ -132,18 +132,17 @@ export async function updateProduct(id: string, formData: FormData) {
 
   try {
     await prisma.$transaction(async (tx) => {
-      // 1. Periksa varian lama yang sudah terkait dengan pesanan agar tidak memicu error Foreign Key
+      // 1. Ambil semua varian lama yang ada di database untuk produk ini
       const existingVariants = await tx.productVariant.findMany({
         where: { productId: id },
         include: { _count: { select: { orderItems: true } } },
       });
 
-      // Hapus opsi lama
+      // Hapus opsi lama dan buat opsi baru
       await tx.productOption.deleteMany({
         where: { productId: id },
       });
 
-      // Buat opsi baru
       if (options.length > 0) {
         await tx.productOption.createMany({
           data: options.map((opt: any) => ({
@@ -154,48 +153,99 @@ export async function updateProduct(id: string, formData: FormData) {
         });
       }
 
-      // Hapus hanya varian yang belum pernah dipesan
-      const variantsToDelete = existingVariants.filter((v) => v._count.orderItems === 0);
-      if (variantsToDelete.length > 0) {
+      // Helper untuk membandingkan semantik options (tidak bergantung pada urutan key)
+      const areOptionsEqual = (
+        optA: Record<string, any> | null | undefined,
+        optB: Record<string, any> | null | undefined
+      ) => {
+        if (!optA || !optB) return optA === optB;
+        const keysA = Object.keys(optA);
+        const keysB = Object.keys(optB);
+        if (keysA.length !== keysB.length) return false;
+        return keysA.every((k) => optA[k] === optB[k]);
+      };
+
+      // Tentukan variant yang dipertahankan dan yang dihapus
+      const incomingIds = new Set<string>();
+      const variantsToUpdate: { existingId: string; variantData: any }[] = [];
+      const variantsToCreate: any[] = [];
+
+      for (const v of variants) {
+        // Prioritas 1: Gunakan v.id jika ada dan valid pada existingVariants produk ini
+        let matched = v.id ? existingVariants.find((ex) => ex.id === v.id) : undefined;
+
+        // Prioritas 2 (Fallback): Jika v.id tidak ada, cocokkan berdasarkan kesetaraan semantik options
+        if (!matched && v.options) {
+          matched = existingVariants.find(
+            (ex) => !incomingIds.has(ex.id) && areOptionsEqual(ex.options as any, v.options)
+          );
+        }
+
+        if (matched) {
+          incomingIds.add(matched.id);
+          variantsToUpdate.push({
+            existingId: matched.id,
+            variantData: v,
+          });
+        } else {
+          variantsToCreate.push(v);
+        }
+      }
+
+      // Varian yang tidak ada di incoming payload adalah varian yang dihapus oleh admin
+      const variantsToRemove = existingVariants.filter((ex) => !incomingIds.has(ex.id));
+      for (const ex of variantsToRemove) {
+        if (ex._count.orderItems > 0) {
+          throw new Error(
+            `Varian "${ex.name}" tidak dapat dihapus karena sudah memiliki riwayat transaksi/pesanan.`
+          );
+        }
+      }
+
+      if (variantsToRemove.length > 0) {
         await tx.productVariant.deleteMany({
           where: {
-            id: { in: variantsToDelete.map((v) => v.id) },
+            id: { in: variantsToRemove.map((ex) => ex.id) },
           },
         });
       }
 
-      // Buat atau perbarui varian baru
-      for (const v of variants) {
-        const variantName = Object.values(v.options).join(" / ");
-        // Cari apakah varian dengan kombinasi ini sudah ada
-        const matchedExisting = existingVariants.find(
-          (ex) => JSON.stringify(ex.options) === JSON.stringify(v.options)
-        );
+      // Update existing variants (mempertahankan variant.id yang sama)
+      for (const { existingId, variantData: v } of variantsToUpdate) {
+        const variantName = v.options && Object.keys(v.options).length > 0
+          ? Object.values(v.options).join(" / ")
+          : v.name || "Default Variant";
 
-        if (matchedExisting) {
-          await tx.productVariant.update({
-            where: { id: matchedExisting.id },
-            data: {
-              name: variantName,
-              sku: v.sku || null,
-              price: v.price ? parseInt(v.price, 10) : null,
-              stock: v.stock ? parseInt(v.stock, 10) : 0,
-              imageUrl: v.imageUrl || null,
-            },
-          });
-        } else {
-          await tx.productVariant.create({
-            data: {
-              productId: id,
-              name: variantName,
-              sku: v.sku || null,
-              price: v.price ? parseInt(v.price, 10) : null,
-              stock: v.stock ? parseInt(v.stock, 10) : 0,
-              options: v.options,
-              imageUrl: v.imageUrl || null,
-            },
-          });
-        }
+        await tx.productVariant.update({
+          where: { id: existingId },
+          data: {
+            name: variantName,
+            sku: v.sku?.trim() ? v.sku.trim() : null,
+            price: v.price ? parseInt(v.price, 10) : null,
+            stock: v.stock !== undefined && v.stock !== null && v.stock !== "" ? parseInt(v.stock, 10) : 0,
+            options: v.options || {},
+            imageUrl: v.imageUrl || null,
+          },
+        });
+      }
+
+      // Buat varian baru
+      for (const v of variantsToCreate) {
+        const variantName = v.options && Object.keys(v.options).length > 0
+          ? Object.values(v.options).join(" / ")
+          : v.name || "Default Variant";
+
+        await tx.productVariant.create({
+          data: {
+            productId: id,
+            name: variantName,
+            sku: v.sku?.trim() ? v.sku.trim() : null,
+            price: v.price ? parseInt(v.price, 10) : null,
+            stock: v.stock !== undefined && v.stock !== null && v.stock !== "" ? parseInt(v.stock, 10) : 0,
+            options: v.options || {},
+            imageUrl: v.imageUrl || null,
+          },
+        });
       }
 
       // Update data utama produk

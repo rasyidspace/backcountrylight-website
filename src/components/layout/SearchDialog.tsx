@@ -69,7 +69,7 @@ export function SearchDialog() {
             {!isLoading && results.brands.length > 0 && (
               <CommandGroup heading="Brands">
                 {results.brands.map(brand => (
-                  <CommandItem key={`brand-${brand.id}`} onSelect={() => handleSelect(`/brands`)} className="py-3">
+                  <CommandItem key={`brand-${brand.id}`} onSelect={() => handleSelect(`/shop?brand=${encodeURIComponent(brand.slug)}`)} className="py-3">
                     <Search className="mr-2 h-4 w-4 text-muted-foreground" />
                     <span>{brand.name}</span>
                   </CommandItem>

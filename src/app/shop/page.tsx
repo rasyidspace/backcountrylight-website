@@ -11,10 +11,14 @@ export const metadata = {
 export default async function ShopPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const categorySlug = searchParams.category as string;
-  const brandSlug = searchParams.brand as string;
+  const resolvedSearchParams = await searchParams;
+  const categoryParam = resolvedSearchParams.category;
+  const brandParam = resolvedSearchParams.brand;
+  
+  const categorySlug = Array.isArray(categoryParam) ? categoryParam[0] : categoryParam;
+  const brandSlug = Array.isArray(brandParam) ? brandParam[0] : brandParam;
   
   const where: any = {};
   if (categorySlug) {

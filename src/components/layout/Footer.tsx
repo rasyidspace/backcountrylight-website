@@ -1,6 +1,25 @@
 import Link from "next/link";
+import prisma from "@/lib/prisma";
 
-export default function Footer() {
+export default async function Footer() {
+  const categories = await prisma.category.findMany({
+    orderBy: { name: 'asc' }
+  });
+
+  const priorityCategorySlugs = ["shelters", "backpacks", "sleep-systems", "accessories", "cooking"];
+  const displayCategories = priorityCategorySlugs
+    .map(slug => categories.find(c => c.slug === slug))
+    .filter((c): c is typeof categories[number] => Boolean(c));
+
+  if (displayCategories.length < 4) {
+    for (const cat of categories) {
+      if (!displayCategories.some(c => c.id === cat.id)) {
+        displayCategories.push(cat);
+        if (displayCategories.length >= 4) break;
+      }
+    }
+  }
+
   return (
     <footer className="border-t bg-muted/40">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl py-12 md:py-16">
@@ -17,10 +36,13 @@ export default function Footer() {
             <h3 className="font-heading font-medium mb-4">Shop</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link href="/shop" className="hover:text-foreground">All Products</Link></li>
-              <li><Link href="/shop?category=shelters" className="hover:text-foreground">Shelters</Link></li>
-              <li><Link href="/shop?category=backpacks" className="hover:text-foreground">Backpacks</Link></li>
-              <li><Link href="/shop?category=sleep-systems" className="hover:text-foreground">Sleep Systems</Link></li>
-              <li><Link href="/shop?category=accessories" className="hover:text-foreground">Accessories</Link></li>
+              {displayCategories.map(cat => (
+                <li key={cat.id}>
+                  <Link href={`/shop?category=${encodeURIComponent(cat.slug)}`} className="hover:text-foreground">
+                    {cat.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
