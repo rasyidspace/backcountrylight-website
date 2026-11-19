@@ -127,6 +127,64 @@ export function ProductForm({ categories, brands, initialData }: ProductFormProp
     setExistingDetailedImages(prev => prev.filter((_, i) => i !== index));
   };
 
+  const hasReplacementImage = existingDetailedImages.length > 0 || detailedFiles.length > 0;
+
+  const removeMainImage = () => {
+    if (!hasReplacementImage) return;
+
+    if (file && preview && preview.startsWith("blob:")) {
+      URL.revokeObjectURL(preview);
+    }
+
+    if (existingDetailedImages.length > 0) {
+      const promotedUrl = existingDetailedImages[0];
+      setFile(null);
+      setPreview(promotedUrl);
+      setExistingDetailedImages(prev => prev.slice(1));
+
+      // Re-index variants to preserve accurate variant image mappings
+      setVariants(prev => prev.map(v => {
+        if (v.imageUrl === "main") {
+          return { ...v, imageUrl: "" };
+        }
+        if (v.imageUrl === "existing-0") {
+          return { ...v, imageUrl: "main" };
+        }
+        if (v.imageUrl?.startsWith("existing-")) {
+          const idx = parseInt(v.imageUrl.replace("existing-", ""), 10);
+          if (!isNaN(idx) && idx > 0) {
+            return { ...v, imageUrl: `existing-${idx - 1}` };
+          }
+        }
+        return v;
+      }));
+    } else if (detailedFiles.length > 0) {
+      const promotedFile = detailedFiles[0];
+      const promotedPreview = detailedPreviews[0];
+      setFile(promotedFile);
+      setPreview(promotedPreview);
+      setDetailedFiles(prev => prev.slice(1));
+      setDetailedPreviews(prev => prev.slice(1));
+
+      // Re-index variants to preserve accurate variant image mappings
+      setVariants(prev => prev.map(v => {
+        if (v.imageUrl === "main") {
+          return { ...v, imageUrl: "" };
+        }
+        if (v.imageUrl === "new-0") {
+          return { ...v, imageUrl: "main" };
+        }
+        if (v.imageUrl?.startsWith("new-")) {
+          const idx = parseInt(v.imageUrl.replace("new-", ""), 10);
+          if (!isNaN(idx) && idx > 0) {
+            return { ...v, imageUrl: `new-${idx - 1}` };
+          }
+        }
+        return v;
+      }));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -156,6 +214,8 @@ export function ProductForm({ categories, brands, initialData }: ProductFormProp
         
         const { url } = await uploadRes.json();
         formData.append("image", url);
+      } else if (preview) {
+        formData.append("image", preview);
       } else if (!initialData) {
         throw new Error("Please select a main image to upload.");
       }
@@ -185,8 +245,9 @@ export function ProductForm({ categories, brands, initialData }: ProductFormProp
         formData.append("options", JSON.stringify(options.filter(o => o.name && o.values.length > 0)));
       }
       
+      const mainImageUrl = (formData.get("image") as string) || preview || initialData?.image || "";
       const urlMap: Record<string, string> = {
-        "main": file ? formData.get("image") as string : (initialData?.image || ""),
+        "main": mainImageUrl,
       };
       existingDetailedImages.forEach((url, i) => { urlMap[`existing-${i}`] = url; });
       newUrls.forEach((url, i) => { urlMap[`new-${i}`] = url; });
@@ -307,6 +368,19 @@ export function ProductForm({ categories, brands, initialData }: ProductFormProp
                     <div className="absolute top-2 left-2 bg-zinc-900 text-white text-[10px] font-medium px-2 py-0.5 rounded tracking-wider">
                       MAIN
                     </div>
+                    <button 
+                      type="button" 
+                      onClick={removeMainImage}
+                      disabled={!hasReplacementImage || isSubmitting}
+                      title={!hasReplacementImage ? "Gambar utama wajib tersedia jika tidak ada gambar tambahan" : "Hapus gambar utama"}
+                      className={`absolute top-2 right-2 rounded-md p-1.5 transition-opacity shadow-sm ${
+                        hasReplacementImage 
+                          ? "bg-white/90 text-zinc-900 opacity-0 group-hover:opacity-100 hover:bg-red-50 hover:text-red-600" 
+                          : "bg-white/60 text-zinc-400 opacity-0 group-hover:opacity-100 cursor-not-allowed"
+                      }`}
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
                   </>
                 ) : (
                   <div className="flex flex-col items-center justify-center w-full h-full text-zinc-400">
