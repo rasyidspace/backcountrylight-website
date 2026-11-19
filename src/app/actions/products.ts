@@ -294,3 +294,77 @@ export async function deleteProduct(id: string) {
     return { error: error.message || "Failed to delete product. It might be linked to orders." };
   }
 }
+
+export async function updateInlineStock(params: {
+  productId: string;
+  variantId?: string | null;
+  stock: number;
+}) {
+  try {
+    await verifyStaffSession();
+  } catch (err: any) {
+    return { error: err.message || "Unauthorized" };
+  }
+
+  const { productId, variantId, stock } = params;
+
+  if (!productId || typeof productId !== "string") {
+    return { error: "Product ID tidak valid." };
+  }
+
+  if (typeof stock !== "number" || isNaN(stock) || !Number.isInteger(stock) || stock < 0) {
+    return { error: "Nilai stok harus berupa bilangan bulat positif atau 0." };
+  }
+
+  try {
+    if (variantId) {
+      if (typeof variantId !== "string") {
+        return { error: "Variant ID tidak valid." };
+      }
+
+      // Pastikan varian ada dan milik produk ini
+      const variant = await prisma.productVariant.findFirst({
+        where: { id: variantId, productId },
+      });
+
+      if (!variant) {
+        return { error: "Varian produk tidak ditemukan." };
+      }
+
+      const updatedVariant = await prisma.productVariant.update({
+        where: { id: variantId },
+        data: { stock },
+      });
+
+      revalidatePath("/admin/products");
+      revalidatePath("/shop");
+      return { success: true, stock: updatedVariant.stock };
+    } else {
+      // Pastikan produk ada
+      const product = await prisma.product.findUnique({
+        where: { id: productId },
+        include: { _count: { select: { variants: true } } },
+      });
+
+      if (!product) {
+        return { error: "Produk tidak ditemukan." };
+      }
+
+      if (product._count.variants > 0) {
+        return { error: "Produk memiliki varian. Stok harus diubah pada masing-masing varian." };
+      }
+
+      const updatedProduct = await prisma.product.update({
+        where: { id: productId },
+        data: { stock },
+      });
+
+      revalidatePath("/admin/products");
+      revalidatePath("/shop");
+      return { success: true, stock: updatedProduct.stock };
+    }
+  } catch (error: any) {
+    console.error("Inline stock update error:", error);
+    return { error: error.message || "Gagal memperbarui stok." };
+  }
+}

@@ -10,7 +10,17 @@ export default async function ProductsAdminPage() {
     include: {
       category: true,
       brand: true,
-    }
+      variants: {
+        select: {
+          id: true,
+          name: true,
+          sku: true,
+          stock: true,
+          options: true,
+        },
+        orderBy: { name: "asc" },
+      },
+    },
   });
 
   return (

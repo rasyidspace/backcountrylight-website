@@ -17,6 +17,7 @@ export const metadata: Metadata = {
 };
 
 import { ConditionalHeaderFooter } from "@/components/layout/ConditionalHeaderFooter";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function RootLayout({
   children,
@@ -32,6 +33,7 @@ export default function RootLayout({
         >
           {children}
         </ConditionalHeaderFooter>
+        <Toaster />
       </body>
     </html>
   );
