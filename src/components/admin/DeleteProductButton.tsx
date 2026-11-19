@@ -16,7 +16,8 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 
-export function DeleteProductButton({ id }: { id: string }) {
+export function DeleteProductButton({ id, onSuccess }: { id: string; onSuccess?: () => void }) {
+  const [open, setOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
@@ -27,6 +28,8 @@ export function DeleteProductButton({ id }: { id: string }) {
         toast.error(result.error);
       } else {
         toast.success("Product deleted successfully");
+        setOpen(false);
+        if (onSuccess) onSuccess();
       }
     } catch (error) {
       toast.error("Failed to delete product");
@@ -36,7 +39,7 @@ export function DeleteProductButton({ id }: { id: string }) {
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={
         <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:bg-red-50 hover:text-red-600 transition-colors" title="Delete Product" />
       }>

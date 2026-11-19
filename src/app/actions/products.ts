@@ -284,14 +284,77 @@ export async function updateProduct(id: string, formData: FormData) {
 export async function deleteProduct(id: string) {
   try {
     await verifyStaffSession();
-    await prisma.product.delete({
+  } catch (err: any) {
+    return { error: err.message || "Akses ditolak. Operasi ini membutuhkan hak akses Admin atau Staf." };
+  }
+
+  if (!id || typeof id !== "string") {
+    return { error: "ID produk tidak valid." };
+  }
+
+  try {
+    // 1. Periksa apakah produk ada dan apakah sudah pernah dipesan
+    const product = await prisma.product.findUnique({
       where: { id },
+      include: {
+        _count: {
+          select: {
+            orderItems: true,
+          },
+        },
+        variants: {
+          select: {
+            id: true,
+            _count: {
+              select: {
+                orderItems: true,
+              },
+            },
+          },
+        },
+      },
     });
+
+    if (!product) {
+      return { error: "Produk tidak ditemukan." };
+    }
+
+    const hasProductOrders = product._count.orderItems > 0;
+    const hasVariantOrders = product.variants.some((v) => v._count.orderItems > 0);
+
+    if (hasProductOrders || hasVariantOrders) {
+      return {
+        error: "Produk tidak dapat dihapus karena sudah digunakan dalam pesanan.",
+      };
+    }
+
+    // 2. Hapus secara atomic di dalam transaksi
+    await prisma.$transaction(async (tx) => {
+      // Hapus opsi produk
+      await tx.productOption.deleteMany({
+        where: { productId: id },
+      });
+
+      // Hapus varian produk
+      await tx.productVariant.deleteMany({
+        where: { productId: id },
+      });
+
+      // Hapus produk
+      await tx.product.delete({
+        where: { id },
+      });
+    });
+
     revalidatePath("/admin/products");
     revalidatePath("/shop");
     return { success: true };
   } catch (error: any) {
-    return { error: error.message || "Failed to delete product. It might be linked to orders." };
+    console.error("Delete product error:", error);
+    if (error.code === "P2003") {
+      return { error: "Produk tidak dapat dihapus karena masih terkait dengan data lain." };
+    }
+    return { error: error.message || "Gagal menghapus produk." };
   }
 }
 

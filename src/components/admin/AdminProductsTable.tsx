@@ -193,6 +193,10 @@ export function AdminProductsTable({ products: initialProducts }: AdminProductsT
     });
   };
 
+  const handleProductDeleteSuccess = (productId: string) => {
+    setProducts((prev) => prev.filter((p) => p.id !== productId));
+  };
+
   const handleProductStockSuccess = (productId: string, newStock: number) => {
     setProducts((prev) =>
       prev.map((p) => (p.id === productId ? { ...p, stock: newStock } : p))
@@ -446,7 +450,10 @@ export function AdminProductsTable({ products: initialProducts }: AdminProductsT
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <DeleteProductButton id={product.id} />
+                          <DeleteProductButton
+                            id={product.id}
+                            onSuccess={() => handleProductDeleteSuccess(product.id)}
+                          />
                         </td>
                       </tr>
 
